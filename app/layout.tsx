@@ -4,19 +4,39 @@ import "./globals.css";
 import { Buenard } from "next/font/google";
 
 const buenard = Buenard({ subsets: ["latin"], weight: ["400", "700"] });
+const baseUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
   title: "Shitcoin Fountain",
-  description: "Rid yourself of dust. Throw it in the wishing well.",
+  description: "Yeet your garbage tokens into the magical wishing well.",
+  metadataBase: new URL(baseUrl),
   icons: {
-    icon: "/fountain.png",
+    icon: [
+      { url: "/fountain.png", type: "image/png", sizes: "32x32" },
+      { url: "/fountain.png", type: "image/png", sizes: "192x192" },
+    ],
+    shortcut: "/fountain.png",
   },
   openGraph: {
-    images: "/preview.png",
+    title: "Shitcoin Fountain",
+    description: "Yeet your garbage tokens into the magical wishing well.",
+    url: baseUrl,
+    siteName: "Shitcoin Fountain",
+    images: [
+      {
+        url: "/preview.png",
+        width: 1200,
+        height: 630,
+        alt: "Shitcoin Fountain preview",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    images: "/preview.png",
+    title: "Shitcoin Fountain",
+    description: "Yeet your garbage tokens into the magical wishing well.",
+    images: ["/preview.png"],
   },
 };
 
