@@ -8,6 +8,16 @@ const buenard = Buenard({ subsets: ["latin"], weight: ["400", "700"] });
 export const metadata: Metadata = {
   title: "Shitcoin Fountain",
   description: "Rid yourself of dust. Throw it in the wishing well.",
+  icons: {
+    icon: "/fountain.png",
+  },
+  openGraph: {
+    images: "/preview.png",
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: "/preview.png",
+  },
 };
 
 export default function RootLayout({
