@@ -8,37 +8,39 @@ const carattere = Carattere({ subsets: ['latin'], weight: '400' });
 
 export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [muted, setMuted] = useState(true);
 
   const toggleSound = () => {
     const video = videoRef.current;
+    const audio = audioRef.current;
     if (!video) return;
     const nextMuted = !muted;
     video.muted = nextMuted;
     if (video.paused) video.play();
+    if (audio) {
+      audio.muted = nextMuted;
+      if (!nextMuted) {
+        audio.loop = true;
+        audio.play();
+      } else {
+        audio.pause();
+      }
+    }
     setMuted(nextMuted);
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-8 relative overflow-hidden">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-start px-8 pb-12 pt-24 sm:pt-28 relative overflow-hidden">
       {/* Top controls */}
-      <div className="hidden sm:flex absolute top-8 right-8 items-center gap-4 z-20">
+      <div className="absolute top-6 right-6 sm:top-8 sm:right-8 flex items-center gap-6 z-30">
         <button
           onClick={toggleSound}
-          className="relative hover:scale-105 transition"
+          className="text-lg text-black underline decoration-1 decoration-black hover:opacity-70 transition"
           aria-label={muted ? 'Unmute fountain' : 'Mute fountain'}
           type="button"
         >
-          <img
-            src="/unmute.png"
-            alt=""
-            className={`w-10 h-10 ${muted ? 'opacity-60' : 'opacity-100'}`}
-          />
-          {muted && (
-            <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="block w-12 h-1 bg-red-500 rotate-45 rounded-full" />
-            </span>
-          )}
+          {muted ? 'Sound off' : 'Sound on'}
         </button>
 
         <ConnectButton.Custom>
@@ -63,17 +65,10 @@ export default function Home() {
             return (
               <button
                 onClick={handleClick}
-                className="relative w-45 hover:scale-105 transition"
+                className="text-lg text-black underline decoration-1 decoration-black hover:opacity-70 transition font-normal"
                 aria-label="Connect wallet"
               >
-                <img
-                  src="/button.png"
-                  alt=""
-                  className="block w-full h-auto"
-                />
-                <span className="absolute inset-0 flex items-center justify-center text-black font-semibold drop-shadow">
-                  {connected ? account.displayName : 'Connect Wallet'}
-                </span>
+                {connected ? account.displayName : 'Connect wallet'}
               </button>
             );
           }}
@@ -87,68 +82,9 @@ export default function Home() {
 
       {/* Main content */}
       <div className="flex flex-col items-center gap-5 z-10">
-        
-        {/* Mobile controls */}
-        <div className="sm:hidden w-full flex items-center justify-center gap-4 mt-2">
-          <button
-            onClick={toggleSound}
-            className="relative hover:scale-105 transition"
-            aria-label={muted ? 'Unmute fountain' : 'Mute fountain'}
-            type="button"
-          >
-            <img
-              src="/unmute.png"
-              alt=""
-              className={`w-10 h-10 ${muted ? 'opacity-60' : 'opacity-100'}`}
-            />
-            {muted && (
-              <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <span className="block w-12 h-1 bg-red-500 rotate-45 rounded-full" />
-              </span>
-            )}
-          </button>
-
-          <ConnectButton.Custom>
-            {({
-              account,
-              chain,
-              mounted,
-              openAccountModal,
-              openChainModal,
-              openConnectModal,
-            }) => {
-              const ready = mounted;
-              const connected = ready && account && chain && !chain.unsupported;
-
-              const handleClick = () => {
-                if (!ready) return;
-                if (chain && chain.unsupported) return openChainModal();
-                if (connected) return openAccountModal();
-                return openConnectModal();
-              };
-
-              return (
-                <button
-                  onClick={handleClick}
-                  className="relative w-45 hover:scale-105 transition"
-                  aria-label="Connect wallet"
-                >
-                  <img
-                    src="/button.png"
-                    alt=""
-                    className="block w-full h-auto"
-                  />
-                  <span className="absolute inset-0 flex items-center justify-center text-black font-semibold drop-shadow">
-                    {connected ? account.displayName : 'Connect Wallet'}
-                  </span>
-                </button>
-              );
-            }}
-          </ConnectButton.Custom>
-        </div>
 
         {/* Title */}
-        <h1 className={`${carattere.className} text-6xl italic text-gray-800 text-center`}>
+        <h1 className={`${carattere.className} text-5xl sm:text-6xl italic text-gray-800 text-center whitespace-nowrap`}>
           Shitcoin Fountain
         </h1>
 
@@ -163,12 +99,19 @@ export default function Home() {
             muted={muted}
             playsInline
           />
+          <audio
+            ref={audioRef}
+            src="/fountain.mp3"
+            muted={muted}
+            loop
+            aria-hidden="true"
+          />
         </div>
 
         {/* Tagline */}
         <p className="text-center text-gray-700 text-lg max-w-md">
-          Rid yourself of dust.<br />
-          Throw it in the wishing well.
+          Throw a shitcoin.<br />
+          Make a wish.
         </p>
 
         {/* Throw button */}
