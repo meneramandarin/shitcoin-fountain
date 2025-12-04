@@ -31,7 +31,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-start px-8 pb-12 pt-24 sm:pt-28 relative overflow-hidden">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-start px-8 pb-36 sm:pb-12 pt-24 sm:pt-28 relative overflow-hidden">
       {/* Top controls */}
       <div className="absolute top-6 right-6 sm:top-8 sm:right-8 flex items-center gap-6 z-30">
         <button
@@ -131,7 +131,7 @@ export default function Home() {
         </button>
 
         {/* Mobile garnish row */}
-        <div className="w-full max-w-md px-6 sm:hidden pointer-events-none">
+        <div className="sm:hidden fixed bottom-0 left-0 right-0 px-6 pointer-events-none">
           <div className="flex items-end justify-between">
             <img src="/flowers.png" alt="" className="w-24 h-24" />
             <img src="/cherub.png" alt="" className="w-20 h-auto" />
