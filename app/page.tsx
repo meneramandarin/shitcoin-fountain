@@ -4,8 +4,8 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { Carattere } from 'next/font/google';
 import { useRef, useState } from 'react';
-import { TokenPicker } from './TokenPicker';
-import { TokenInfo } from './solana';
+import { TokenPicker } from '@/app/TokenPicker';
+import { TokenInfo } from '@/app/solana';
 
 const carattere = Carattere({ subsets: ['latin'], weight: '400' });
 
