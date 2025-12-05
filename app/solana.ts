@@ -2,10 +2,10 @@ import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { createTransferInstruction, getAssociatedTokenAddress, createAssociatedTokenAccountInstruction, getAccount } from '@solana/spl-token';
 
 // ============================================
-// REPLACE THIS WITH YOUR FOUNTAIN WALLET
+// FOUNTAIN WALLET - All thrown shitcoins go here!
 // ============================================
 
-export const FOUNTAIN_ADDRESS = new PublicKey('11111111111111111111111111111111'); // PLACEHOLDER - PUT YOUR WALLET HERE
+export const FOUNTAIN_ADDRESS = new PublicKey('9vAVbfw53JNkiCdbK7ZURUweXFqApKK7w8ezAp3bJX1y');
 
 const HELIUS_API_KEY = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
 
