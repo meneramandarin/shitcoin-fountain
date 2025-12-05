@@ -1,0 +1,154 @@
+import { Connection, PublicKey, Transaction } from '@solana/web3.js';
+import { createTransferInstruction, getAssociatedTokenAddress, createAssociatedTokenAccountInstruction, getAccount } from '@solana/spl-token';
+
+// ============================================
+// REPLACE THIS WITH YOUR FOUNTAIN WALLET
+// ============================================
+
+export const FOUNTAIN_ADDRESS = new PublicKey('11111111111111111111111111111111'); // PLACEHOLDER - PUT YOUR WALLET HERE
+
+const HELIUS_API_KEY = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
+
+export interface TokenInfo {
+  mint: string;
+  symbol: string;
+  name: string;
+  image: string;
+  balance: number;
+  decimals: number;
+  usdValue?: number;
+}
+
+/**
+ * Fetch all fungible tokens for a wallet using Helius
+ */
+export async function fetchWalletTokens(walletAddress: string): Promise<TokenInfo[]> {
+  const response = await fetch(
+    `https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 'shitcoin-fountain',
+        method: 'searchAssets',
+        params: {
+          ownerAddress: walletAddress,
+          tokenType: 'fungible',
+          displayOptions: {
+            showNativeBalance: false,
+          },
+        },
+      }),
+    }
+  );
+
+  const data = await response.json();
+  
+  if (data.error) {
+    console.error('Helius error:', data.error);
+    throw new Error(data.error.message || 'Failed to fetch tokens');
+  }
+
+  const items = data.result?.items || [];
+  
+  // Map to our TokenInfo format
+  const tokens: TokenInfo[] = items
+    .filter((item: any) => {
+      // Filter out tokens with zero balance
+      const balance = item.token_info?.balance || 0;
+      return balance > 0;
+    })
+    .map((item: any) => {
+      const decimals = item.token_info?.decimals || 0;
+      const rawBalance = item.token_info?.balance || 0;
+      const balance = rawBalance / Math.pow(10, decimals);
+      
+      return {
+        mint: item.id,
+        symbol: item.token_info?.symbol || item.content?.metadata?.symbol || '???',
+        name: item.content?.metadata?.name || 'Unknown Token',
+        image: item.content?.links?.image || item.content?.files?.[0]?.uri || '',
+        balance,
+        decimals,
+        usdValue: item.token_info?.price_info?.total_price || undefined,
+      };
+    })
+    // Sort by USD value ascending (shittiest first!) or by balance if no price
+    .sort((a: TokenInfo, b: TokenInfo) => {
+      if (a.usdValue !== undefined && b.usdValue !== undefined) {
+        return a.usdValue - b.usdValue; // Lowest value first
+      }
+      if (a.usdValue !== undefined) return 1;
+      if (b.usdValue !== undefined) return -1;
+      return 0;
+    });
+
+  return tokens;
+}
+
+/**
+ * Build a transaction to throw a token into the fountain
+ */
+export async function buildThrowTransaction(
+  connection: Connection,
+  senderWallet: PublicKey,
+  tokenMint: PublicKey,
+  amount: number,
+  decimals: number
+): Promise<Transaction> {
+  const transaction = new Transaction();
+  
+  // Get sender's token account
+  const senderTokenAccount = await getAssociatedTokenAddress(
+    tokenMint,
+    senderWallet
+  );
+  
+  // Get or create fountain's token account
+  const fountainTokenAccount = await getAssociatedTokenAddress(
+    tokenMint,
+    FOUNTAIN_ADDRESS
+  );
+  
+  // Check if fountain token account exists
+  let fountainAccountExists = false;
+  try {
+    await getAccount(connection, fountainTokenAccount);
+    fountainAccountExists = true;
+  } catch {
+    fountainAccountExists = false;
+  }
+  
+  // If fountain doesn't have a token account for this mint, create it
+  // The sender pays for this (it's like ~0.002 SOL)
+  if (!fountainAccountExists) {
+    transaction.add(
+      createAssociatedTokenAccountInstruction(
+        senderWallet,        // payer
+        fountainTokenAccount, // new account
+        FOUNTAIN_ADDRESS,     // owner
+        tokenMint            // mint
+      )
+    );
+  }
+  
+  // Add transfer instruction
+  const rawAmount = BigInt(Math.floor(amount * Math.pow(10, decimals)));
+  
+  transaction.add(
+    createTransferInstruction(
+      senderTokenAccount,
+      fountainTokenAccount,
+      senderWallet,
+      rawAmount
+    )
+  );
+  
+  // Get recent blockhash
+  const { blockhash } = await connection.getLatestBlockhash();
+  transaction.recentBlockhash = blockhash;
+  transaction.feePayer = senderWallet;
+  
+  return transaction;
+}
