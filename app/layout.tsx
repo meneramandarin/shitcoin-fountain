@@ -4,8 +4,7 @@ import "./globals.css";
 import { Buenard } from "next/font/google";
 
 const buenard = Buenard({ subsets: ["latin"], weight: ["400", "700"] });
-const baseUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const baseUrl = "https://www.shitcoinfountain.fun";
 
 export const metadata: Metadata = {
   title: "Shitcoin Fountain",
@@ -23,11 +22,12 @@ export const metadata: Metadata = {
     description: "Yeet your garbage tokens into the magical wishing well.",
     url: baseUrl,
     siteName: "Shitcoin Fountain",
+    type: "website",
     images: [
       {
         url: "/preview.png",
         width: 1200,
-        height: 630,
+        height: 1200,
         alt: "Shitcoin Fountain preview",
       },
     ],
