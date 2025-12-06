@@ -3,10 +3,11 @@
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
 import { useState, useEffect } from 'react';
-import { Buenard } from 'next/font/google';
+import { Buenard, IBM_Plex_Mono } from 'next/font/google';
 import { TokenInfo, fetchWalletTokens, buildThrowTransaction } from './solana';
 
 const buenard = Buenard({ subsets: ['latin'], weight: ['400', '700'] });
+const ibmPlexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'] });
 
 interface TokenPickerProps {
   isOpen: boolean;
@@ -105,12 +106,12 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
           <div className= "p-4 border-b border-blue-900/20 flex justify-between items-center shrink-0">
-            <h2 className={`text-xl font-bold text-blue-900`}>
+            <h2 className={`text-xl font-bold text-black`}>
               {selectedToken ? 'How much?' : 'Choose your Offering'}
             </h2>
             <button
               onClick={onClose}
-              className="text-blue-800 hover:text-blue-900 text-2xl leading-none"
+              className="text-black hover:text-gray-800 text-2xl leading-none"
             >
               ×
             </button>
@@ -168,15 +169,15 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-gray-800">
-                      {token.balance.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                    <div className={`text-sm text-gray-800 ${ibmPlexMono.className}`}>
+                      {token.balance.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
                     </div>
                     {token.usdValue !== undefined ? (
-                      <div className="text-xs text-gray-500">
+                      <div className={`text-xs text-gray-500 ${ibmPlexMono.className}`}>
                         ${token.usdValue.toFixed(2)}
                       </div>
                     ) : (
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 italic">
                         literally worthless
                       </div>
                     )}
@@ -196,7 +197,7 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
                 ← Back to token list
               </button>
               
-              <div className="flex items-center gap-3 p-3 bg-blue-50/50 border border-blue-900/20">
+              <div className="flex items-center gap-3 p-3">
                 {selectedToken.image ? (
                   <img
                     src={selectedToken.image}
@@ -209,30 +210,36 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
                   </div>
                 )}
                 <div>
-                  <div className="font-medium text-blue-900">{selectedToken.symbol}</div>
-                  <div className="text-sm text-blue-800/70">
-                    Balance: {selectedToken.balance.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                  <div className="font-medium text-black">{selectedToken.symbol}</div>
+                  <div className="text-sm text-gray-700">
+                    Balance: <span className={ibmPlexMono.className}>{selectedToken.balance.toLocaleString(undefined, { maximumFractionDigits: 4 })}</span>
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-blue-900 mb-1">
-                  Amount to throw
+                <label className="block text-sm font-medium text-black mb-1">
+                  Offering Amount
                 </label>
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-end">
                   <input
                     type="number"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="0.00"
-                    className="flex-1 px-2 py-1 border border-blue-900/30 bg-white/80 focus:outline-none focus:border-blue-900 text-black text-sm"
+                    className={`flex-1 px-2 py-1 border border-blue-900/30 bg-white/80 focus:outline-none focus:border-blue-900 text-black text-sm ${ibmPlexMono.className}`}
                     max={selectedToken.balance}
                     step="any"
                   />
                   <button
-                    onClick={() => setAmount(selectedToken.balance.toString())}
-                    className="px-2 py-1 bg-blue-100 hover:bg-blue-200 border border-blue-900/30 text-xs font-medium text-blue-900 whitespace-nowrap"
+                    onClick={() => {
+                      if (amount === selectedToken.balance.toString()) {
+                        setAmount('');
+                      } else {
+                        setAmount(selectedToken.balance.toString());
+                      }
+                    }}
+                    className="px-1 pb-0.5 text-xs font-medium text-black underline hover:opacity-70 whitespace-nowrap"
                   >
                     Full Port
                   </button>
@@ -244,13 +251,13 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
 
           {/* Footer */}
           {selectedToken && (
-            <div className="p-4 border-t border-blue-900/20 shrink-0">
+            <div className="p-4 border-t border-blue-900/20 shrink-0 text-center">
               <button
                 onClick={handleThrow}
                 disabled={sending || !amount || parseFloat(amount) <= 0}
-                className="w-full py-2 bg-blue-900 text-blue-50 font-medium hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition border border-blue-950 text-sm"
+                className="text-black font-medium hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed transition text-xl underline"
               >
-                {sending ? 'Throwing...' : `Throw ${amount || '0'} ${selectedToken.symbol}`}
+                {sending ? 'Throwing...' : 'Throw into the Fountain'}
               </button>
             </div>
           )}
