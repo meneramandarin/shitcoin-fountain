@@ -3,7 +3,10 @@
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
 import { useState, useEffect } from 'react';
+import { Buenard } from 'next/font/google';
 import { TokenInfo, fetchWalletTokens, buildThrowTransaction } from './solana';
+
+const buenard = Buenard({ subsets: ['latin'], weight: ['400', '700'] });
 
 interface TokenPickerProps {
   isOpen: boolean;
@@ -83,31 +86,27 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="relative max-w-sm w-full max-h-[80vh]">
-        {/* Frame wrapper - scales to container */}
-        <div
-          className="absolute inset-[-110px] sm:inset-[-170px] pointer-events-none"
-          style={{
-            backgroundImage: 'url(/frame.png)',
-            backgroundSize: '80% 100%',
-            backgroundPosition: 'center',
-            imageRendering: 'pixelated',
-          }}
+    <div className={`fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 ${buenard.className}`}>
+      <div className="relative flex items-center justify-center w-[380px] h-[500px]">
+        {/* Frame image - fixed size, independent of content */}
+        <img
+          src="/frame.png"
+          alt=""
+          className="absolute pointer-events-none w-full h-full"
         />
 
-        {/* Content */}
+        {/* Content - positioned over the frame */}
         <div
-          className="relative max-h-[400px] max-w-[280px] mx-auto overflow-hidden flex flex-col"
+          className="relative max-h-[400px] max-w-[350px] overflow-hidden flex flex-col"
           style={{
             background: 'transparent',
           }}
         >
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="p-4 border-b border-blue-900/20 flex justify-between items-center shrink-0">
+          <div className= "p-2 border-b border-blue-900/20 flex justify-between items-center shrink-0">
             <h2 className={`text-xl font-bold text-blue-900`}>
-              {selectedToken ? 'How much?' : 'Pick your shitter'}
+              {selectedToken ? 'How much?' : 'Choose your Offering'}
             </h2>
             <button
               onClick={onClose}
