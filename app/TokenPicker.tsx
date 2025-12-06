@@ -88,7 +88,7 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
         {/* Header */}
         <div className="p-4 border-b flex justify-between items-center">
           <h2 className="text-xl font-bold text-gray-800">
-            {selectedToken ? 'How much?' : 'Pick your shitcoin'}
+            {selectedToken ? 'How much?' : 'Pick your shitter'}
           </h2>
           <button 
             onClick={onClose}
@@ -180,8 +180,8 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
               
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                 {selectedToken.image ? (
-                  <img 
-                    src={selectedToken.image} 
+                  <img
+                    src={selectedToken.image}
                     alt={selectedToken.symbol}
                     className="w-10 h-10 rounded-full"
                   />
@@ -191,7 +191,7 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
                   </div>
                 )}
                 <div>
-                  <div className="font-medium">{selectedToken.symbol}</div>
+                  <div className="font-medium text-black">{selectedToken.symbol}</div>
                   <div className="text-sm text-gray-500">
                     Balance: {selectedToken.balance.toLocaleString(undefined, { maximumFractionDigits: 4 })}
                   </div>
@@ -208,15 +208,15 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="0.00"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                     max={selectedToken.balance}
                     step="any"
                   />
                   <button
                     onClick={() => setAmount(selectedToken.balance.toString())}
-                    className="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm font-medium"
+                    className="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm font-medium text-black"
                   >
-                    MAX
+                    Full Port
                   </button>
                 </div>
               </div>
