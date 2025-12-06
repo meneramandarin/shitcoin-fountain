@@ -104,7 +104,7 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
         >
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
-          <div className= "p-2 border-b border-blue-900/20 flex justify-between items-center shrink-0">
+          <div className= "p-4 border-b border-blue-900/20 flex justify-between items-center shrink-0">
             <h2 className={`text-xl font-bold text-blue-900`}>
               {selectedToken ? 'How much?' : 'Choose your Offering'}
             </h2>
@@ -226,13 +226,13 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="0.00"
-                    className="flex-1 px-3 py-2 border border-blue-900/30 bg-white/80 focus:outline-none focus:border-blue-900 text-black"
+                    className="flex-1 px-2 py-1 border border-blue-900/30 bg-white/80 focus:outline-none focus:border-blue-900 text-black text-sm"
                     max={selectedToken.balance}
                     step="any"
                   />
                   <button
                     onClick={() => setAmount(selectedToken.balance.toString())}
-                    className="px-3 py-2 bg-blue-100 hover:bg-blue-200 border border-blue-900/30 text-sm font-medium text-blue-900"
+                    className="px-2 py-1 bg-blue-100 hover:bg-blue-200 border border-blue-900/30 text-xs font-medium text-blue-900 whitespace-nowrap"
                   >
                     Full Port
                   </button>
@@ -248,7 +248,7 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
               <button
                 onClick={handleThrow}
                 disabled={sending || !amount || parseFloat(amount) <= 0}
-                className="w-full py-3 bg-blue-900 text-blue-50 font-medium hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition border border-blue-950"
+                className="w-full py-2 bg-blue-900 text-blue-50 font-medium hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition border border-blue-950 text-sm"
               >
                 {sending ? 'Throwing...' : `Throw ${amount || '0'} ${selectedToken.symbol}`}
               </button>
