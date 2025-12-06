@@ -10,7 +10,6 @@ import { TokenInfo } from '@/app/solana';
 const carattere = Carattere({ subsets: ['latin'], weight: '400' });
 
 export default function Home() {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [muted, setMuted] = useState(true);
   const [showTokenPicker, setShowTokenPicker] = useState(false);
@@ -20,20 +19,15 @@ export default function Home() {
   const { setVisible } = useWalletModal();
 
   const toggleSound = () => {
-    const video = videoRef.current;
     const audio = audioRef.current;
-    if (!video) return;
+    if (!audio) return;
     const nextMuted = !muted;
-    video.muted = nextMuted;
-    if (video.paused) video.play();
-    if (audio) {
-      audio.muted = nextMuted;
-      if (!nextMuted) {
-        audio.loop = true;
-        audio.play();
-      } else {
-        audio.pause();
-      }
+    audio.muted = nextMuted;
+    if (!nextMuted) {
+      audio.loop = true;
+      audio.play();
+    } else {
+      audio.pause();
     }
     setMuted(nextMuted);
   };
@@ -104,14 +98,10 @@ export default function Home() {
 
         {/* Fountain */}
         <div className="my-4 flex flex-col items-center gap-3">
-          <video
-            ref={videoRef}
-            src="/fountain.webm"
+          <img
+            src="/fountain.gif"
+            alt="Fountain animation"
             className="w-64 h-auto rounded-lg relative z-10"
-            autoPlay
-            loop
-            muted={muted}
-            playsInline
           />
           <audio
             ref={audioRef}
