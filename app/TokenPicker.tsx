@@ -153,9 +153,13 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
                     <div className="text-sm text-gray-800">
                       {token.balance.toLocaleString(undefined, { maximumFractionDigits: 4 })}
                     </div>
-                    {token.usdValue !== undefined && (
+                    {token.usdValue !== undefined ? (
                       <div className="text-xs text-gray-400">
                         ${token.usdValue.toFixed(2)}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-gray-400">
+                        literally worthless
                       </div>
                     )}
                   </div>
