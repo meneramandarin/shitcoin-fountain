@@ -23,13 +23,25 @@ export default function Home() {
     if (!audio) return;
     const nextMuted = !muted;
     audio.muted = nextMuted;
+    setMuted(nextMuted);
+
     if (!nextMuted) {
-      audio.loop = true;
+      audio.currentTime = 0;
       audio.play();
+
+      // Replay every 6.8 seconds for seamless loop
+      const interval = setInterval(() => {
+        const audio = audioRef.current;
+        if (audio && !audio.muted) {
+          audio.currentTime = 0;
+          audio.play();
+        } else {
+          clearInterval(interval);
+        }
+      }, 6800);
     } else {
       audio.pause();
     }
-    setMuted(nextMuted);
   };
 
   const handleWalletClick = () => {
@@ -107,7 +119,6 @@ export default function Home() {
             ref={audioRef}
             src="/fountain.mp3"
             muted={muted}
-            loop
             aria-hidden="true"
           />
         </div>
