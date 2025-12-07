@@ -5,6 +5,7 @@ import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { Carattere } from 'next/font/google';
 import { useRef, useState } from 'react';
 import { TokenPicker } from '@/app/TokenPicker';
+import { CelebrationScreen } from '@/app/CelebrationScreen';
 import { TokenInfo } from '@/app/solana';
 
 const carattere = Carattere({ subsets: ['latin'], weight: '400' });
@@ -13,6 +14,7 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [muted, setMuted] = useState(true);
   const [showTokenPicker, setShowTokenPicker] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
   const [lastThrow, setLastThrow] = useState<{ token: TokenInfo; amount: number } | null>(null);
 
   const { publicKey, disconnect, connected } = useWallet();
@@ -62,8 +64,11 @@ export default function Home() {
 
   const handleThrowSuccess = (token: TokenInfo, amount: number) => {
     setLastThrow({ token, amount });
-    // TODO: Play splash animation/sound
-    // TODO: Show success message
+    setShowCelebration(true);
+  };
+
+  const handleCelebrationComplete = () => {
+    setShowCelebration(false);
     setTimeout(() => setLastThrow(null), 5000);
   };
 
@@ -173,6 +178,12 @@ export default function Home() {
         isOpen={showTokenPicker}
         onClose={() => setShowTokenPicker(false)}
         onSuccess={handleThrowSuccess}
+      />
+
+      {/* Celebration Screen */}
+      <CelebrationScreen
+        isVisible={showCelebration}
+        onComplete={handleCelebrationComplete}
       />
     </div>
   );
