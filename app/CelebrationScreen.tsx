@@ -9,7 +9,6 @@ interface CelebrationScreenProps {
 
 export function CelebrationScreen({ isVisible, onComplete }: CelebrationScreenProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -24,22 +23,15 @@ export function CelebrationScreen({ isVisible, onComplete }: CelebrationScreenPr
 
   useEffect(() => {
     if (isVisible) {
-      // Play both the animation and sound
       const audio = audioRef.current;
-      const video = videoRef.current;
 
       if (audio) {
         audio.currentTime = 0;
-        audio.play().catch(err => console.error('Audio play failed:', err));
-      }
-
-      if (video) {
-        video.currentTime = 0;
-        video.play().catch(err => console.error('Video play failed:', err));
+        audio.play().catch((err: any) => console.error('Audio play failed:', err));
       }
 
       // Wait for the animation to complete before calling onComplete
-      // Adjust timeout based on your toss.gif duration
+      // Adjust timeout based on your gif duration
       const timer = setTimeout(() => {
         onComplete();
       }, 3000); // Adjust this duration to match your gif length
@@ -52,13 +44,11 @@ export function CelebrationScreen({ isVisible, onComplete }: CelebrationScreenPr
 
   return (
     <div className="fixed inset-0 z-[100] bg-white flex items-center justify-center">
-      {/* Full-screen video */}
-      <video
-        ref={videoRef}
-        src={isMobile ? "/mobile-toss.mp4" : "/toss.mp4"}
+      {/* Full-screen GIF */}
+      <img
+        src={isMobile ? "/mobile-toss.gif" : "/toss.gif"}
+        alt="Celebration"
         className="absolute inset-0 w-full h-full object-cover"
-        playsInline
-        muted={false}
       />
 
       {/* Audio element */}
