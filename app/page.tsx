@@ -3,7 +3,8 @@
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { Carattere } from 'next/font/google';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { TokenPicker } from '@/app/TokenPicker';
 import { CelebrationScreen } from '@/app/CelebrationScreen';
 import { TokenInfo } from '@/app/solana';
@@ -11,6 +12,7 @@ import { TokenInfo } from '@/app/solana';
 const carattere = Carattere({ subsets: ['latin'], weight: '400' });
 
 export default function Home() {
+  const searchParams = useSearchParams();
   const audioRef = useRef<HTMLAudioElement>(null);
   const [muted, setMuted] = useState(true);
   const [showTokenPicker, setShowTokenPicker] = useState(false);
@@ -19,6 +21,36 @@ export default function Home() {
 
   const { publicKey, disconnect, connected } = useWallet();
   const { setVisible } = useWalletModal();
+
+  // Development mode: URL query params for testing UI states
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return;
+
+    const showCelebrationParam = searchParams.get('celebration');
+    const showSuccessParam = searchParams.get('success');
+
+    if (showCelebrationParam === 'true') {
+      setShowCelebration(true);
+    }
+
+    if (showSuccessParam === 'true') {
+      const tokenSymbol = searchParams.get('token') || 'BONK';
+      const tokenAmount = parseInt(searchParams.get('amount') || '1000');
+
+      setLastThrow({
+        token: {
+          mint: 'mock-mint-address',
+          symbol: tokenSymbol,
+          name: tokenSymbol,
+          image: '',
+          balance: tokenAmount,
+          decimals: 6,
+          usdValue: undefined
+        },
+        amount: tokenAmount
+      });
+    }
+  }, [searchParams]);
 
   const toggleSound = () => {
     const audio = audioRef.current;
@@ -63,13 +95,13 @@ export default function Home() {
   };
 
   const handleThrowSuccess = (token: TokenInfo, amount: number) => {
-    setLastThrow({ token, amount });
     setShowCelebration(true);
+    setLastThrow({ token, amount });
   };
 
   const handleCelebrationComplete = () => {
     setShowCelebration(false);
-    setTimeout(() => setLastThrow(null), 5000);
+    // Success message stays visible (lastThrow is not cleared)
   };
 
   const truncateAddress = (address: string) => {
@@ -135,7 +167,7 @@ export default function Home() {
         </p>
 
         {/* Success message */}
-        {lastThrow && (
+        {lastThrow && !showCelebration && (
           <div className="text-center text-green-600 text-sm animate-pulse">
             🌟 You threw {lastThrow.amount.toLocaleString()} {lastThrow.token.symbol} into the fountain!
           </div>
