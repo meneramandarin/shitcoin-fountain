@@ -3,7 +3,7 @@
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { Carattere } from 'next/font/google';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { TokenPicker } from '@/app/TokenPicker';
 import { CelebrationScreen } from '@/app/CelebrationScreen';
@@ -11,7 +11,7 @@ import { TokenInfo } from '@/app/solana';
 
 const carattere = Carattere({ subsets: ['latin'], weight: '400' });
 
-export default function Home() {
+function HomeContent() {
   const searchParams = useSearchParams();
   const audioRef = useRef<HTMLAudioElement>(null);
   const [muted, setMuted] = useState(true);
@@ -241,5 +241,13 @@ export default function Home() {
         onComplete={handleCelebrationComplete}
       />
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <HomeContent />
+    </Suspense>
   );
 }
