@@ -2,20 +2,72 @@
 
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
-import { Carattere } from 'next/font/google';
+import { Carattere, IBM_Plex_Mono } from 'next/font/google';
 import { useRef, useState } from 'react';
 import { TokenPicker } from '@/app/TokenPicker';
 import { CelebrationScreen } from '@/app/CelebrationScreen';
 import { TokenInfo } from '@/app/solana';
 
 const carattere = Carattere({ subsets: ['latin'], weight: '400' });
+const ibmPlexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'] });
+
+const FORTUNES = [
+  "That 'dead' token you just threw into the Fountain will 10x.",
+  "You will screenshot a gain. You will not sell. The Fountain has seen this before.",
+  "An airdrop is coming. It will be worth $11. You will still tell people about it.",
+  "The Fountain senses you mass-applying for grants. It respects the hustle but sees rejection in your aura.",
+  "You will reach your vesting cliff. The tokens will not be worth the gas to claim them.",
+  "A promising roadmap will appear. It will be 'just two weeks out' for seven months.",
+  "The Fountain sees what you built. It is a casino. You will not call it a casino.",
+  "You will quote retweet a 5000-word VC essay. You will not read it. Neither will anyone else.",
+  "The Fountain senses you explaining your protocol to your parents during Christmas. They will nod. They will not understand.",
+  "The Fountain sees a new L1 in your future. It will be 'different this time.' It will not be different.",
+  "You will tell yourself this cycle is the one where you get out. The Fountain has heard this before.",
+  "Someone will ask what you do for work. You will say 'fintech.' This is not technically a lie.",
+  "The Fountain sees you reading crypto exit posts at 2am. You will open LinkedIn.",
+  "You will realize you cannot identify a sustainable business anymore. The Fountain suggests touching grass.",
+  "A token with zero users will reach a $500M market cap. You will feel nothing.",
+  "The Fountain asks: do you want to make money, or do you want to be right? It already knows your answer.",
+  "You will tell yourself you're building the future of finance. The Fountain sees a slot machine with better UX.",
+  "You will write a 4,000-word thread on revenue meta. It will get 12 likes. A dog with a hat will get 12,000.",
+  "The Fountain asks: what problem are you solving? The Fountain suspects you do not know either.",
+  "You will explain ZK proofs to someone at a party. They will not ask a follow-up question. This is correct.",
+  "You will pivot to 'Robotics x Crypto.' The Fountain has seen this before. It was called 'AI x Blockchain' in 2024.",
+  "The Fountain senses you building infrastructure for infrastructure. Users remain theoretical.",
+  "Someone will describe your protocol as 'like Uber but decentralized.' You will have zero riders.",
+  "You will attend a conference panel called 'Where Are The Users?' The room will be full of VCs. No users will be present.",
+  "The Fountain sees you launching a governance token. Governance will consist of four whales voting to pay themselves.",
+  "A protocol will achieve product-market fit. It will be a casino. It will not call itself a casino.",
+  "The Fountain whispers: after 14 years, the killer app is still 'number go up.' The Fountain respects the honesty.",
+  "Hyperliquid makes $100M per employee. The Fountain makes $0 per employee. The Fountain is more honest about what it does.",
+  "You will compare a perp DEX to Nvidia. You will not ask yourself why this is insane.",
+  "The Fountain sees the 'revenue meta' arriving. It is just casinos again. It has always been casinos.",
+  "Someone will tweet that crypto has 'real business models now.' The business model is gambling fees.",
+  "The Fountain sees VCs tweeting about 'sustainable revenue.' The revenue is from people losing money faster than they can deposit it.",
+  "The Fountain sees you comparing Hyperliquid revenue per employee to Nvidia. One makes GPUs. One makes liquidations. The Fountain does not see the difference either.",
+  "The Fountain senses 83% of institutional investors plan to increase digital asset allocation. The Fountain has seen this survey every year since 2017.",
+  "The Fountain sees the 'fat head, chunky middle, long tail' framework for perp markets. The Fountain sees only the long tail of liquidated traders.",
+  "A researcher will write 'PMF has been demonstrated' about casinos. The Fountain agrees. People love to gamble. This was known.",
+  "The Fountain senses you reading about 'the hype stage' versus 'the maturity stage.' Both stages involve selling tokens to retail.",
+  "A chain will launch its own stablecoin. The profits will 'go back to the ecosystem.'",
+  "You will describe gambling on election outcomes as 'the financialization of uncertainty.' The Fountain describes it as 'gambling on election outcomes.'",
+  "The Fountain sees prediction markets creating 'time-series data of collective expectations.' The Fountain sees people betting on things.",
+  "You will encounter the phrase 'this cycle is different.' The Fountain has encountered this phrase before.",
+  "The Fountain sees 'institutional capital is finally arriving.' The Fountain has been seeing institutional capital arrive since 2017. It walks very slowly.",
+  "A VC will tweet that 'narrative-driven valuations' are being replaced by 'cash-flow-driven valuations.' The next week they will invest in a memecoin.",
+  ];
+
+// Get a random fortune (deterministic based on seed for consistency)
+const getRandomFortune = () => {
+  return FORTUNES[Math.floor(Math.random() * FORTUNES.length)];
+};
 
 export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [muted, setMuted] = useState(true);
   const [showTokenPicker, setShowTokenPicker] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
-  const [lastThrow, setLastThrow] = useState<{ token: TokenInfo; amount: number } | null>(null);
+  const [lastThrow, setLastThrow] = useState<{ token: TokenInfo; amount: number; fortune: string } | null>(null);
 
   const { publicKey, disconnect, connected } = useWallet();
   const { setVisible } = useWalletModal();
@@ -64,7 +116,7 @@ export default function Home() {
 
   const handleThrowSuccess = (token: TokenInfo, amount: number) => {
     setShowCelebration(true);
-    setLastThrow({ token, amount });
+    setLastThrow({ token, amount, fortune: getRandomFortune() });
   };
 
   const handleCelebrationComplete = () => {
@@ -136,10 +188,15 @@ export default function Home() {
           </p>
         )}
 
-        {/* Success message */}
+        {/* Success message with fortune */}
         {lastThrow && !showCelebration && (
-          <div className="text-center text-green-600 text-sm animate-pulse">
-            🌟 You threw {lastThrow.amount.toLocaleString()} {lastThrow.token.symbol} into the fountain!
+          <div className="text-center max-w-md space-y-3">
+            <p className="text-gray-700 text-lg">
+              You threw <span className={ibmPlexMono.className}>{lastThrow.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</span> {lastThrow.token.symbol} into the fountain! The fountain thanks you for your sacrifice. Here's what it sees in your future:
+            </p>
+            <p className="text-gray-700 text-lg">
+              "{lastThrow.fortune}"
+            </p>
           </div>
         )}
 
