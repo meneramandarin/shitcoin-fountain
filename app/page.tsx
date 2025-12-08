@@ -15,7 +15,7 @@ const FORTUNES = [
   "That 'dead' token you just threw into the Fountain will 10x.",
   "You will screenshot a gain. You will not sell. The Fountain has seen this before.",
   "An airdrop is coming. It will be worth $11. You will still tell people about it.",
-  "The Fountain senses you mass-applying for grants. It respects the hustle but sees rejection in your aura.",
+  "The Fountain senses you are applying for grants. It respects the hustle but sees rejection in your aura.",
   "You will reach your vesting cliff. The tokens will not be worth the gas to claim them.",
   "A promising roadmap will appear. It will be 'just two weeks out' for seven months.",
   "The Fountain sees what you built. It is a casino. You will not call it a casino.",
@@ -24,33 +24,30 @@ const FORTUNES = [
   "The Fountain sees a new L1 in your future. It will be 'different this time.' It will not be different.",
   "You will tell yourself this cycle is the one where you get out. The Fountain has heard this before.",
   "Someone will ask what you do for work. You will say 'fintech.' This is not technically a lie.",
-  "The Fountain sees you reading crypto exit posts at 2am. You will open LinkedIn.",
+  "The Fountain sees you reading 'I finally left crypto' posts at 2am. You will open LinkedIn.",
   "You will realize you cannot identify a sustainable business anymore. The Fountain suggests touching grass.",
-  "A token with zero users will reach a $500M market cap. You will feel nothing.",
+  "A token with zero users will reach a $5B market cap. You will feel nothing.",
   "The Fountain asks: do you want to make money, or do you want to be right? It already knows your answer.",
   "You will tell yourself you're building the future of finance. The Fountain sees a slot machine with better UX.",
-  "You will write a 4,000-word thread on revenue meta. It will get 12 likes. A dog with a hat will get 12,000.",
+  "You will write a lengthy thread on revenue meta. It will get 12 likes.",
   "The Fountain asks: what problem are you solving? The Fountain suspects you do not know either.",
   "You will explain ZK proofs to someone at a party. They will not ask a follow-up question. This is correct.",
-  "You will pivot to 'Robotics x Crypto.' The Fountain has seen this before. It was called 'AI x Blockchain' in 2024.",
+  "You will pivot to 'Robotics x Crypto.' The Fountain has seen this before. It was called 'onchain AI' in 2024.",
   "The Fountain senses you building infrastructure for infrastructure. Users remain theoretical.",
-  "Someone will describe your protocol as 'like Uber but decentralized.' You will have zero riders.",
   "You will attend a conference panel called 'Where Are The Users?' The room will be full of VCs. No users will be present.",
   "The Fountain sees you launching a governance token. Governance will consist of four whales voting to pay themselves.",
   "A protocol will achieve product-market fit. It will be a casino. It will not call itself a casino.",
   "The Fountain whispers: after 14 years, the killer app is still 'number go up.' The Fountain respects the honesty.",
-  "Hyperliquid makes $100M per employee. The Fountain makes $0 per employee. The Fountain is more honest about what it does.",
+  "Hyperliquid makes $100M per employee. The Fountain makes $0 per employee.",
   "You will compare a perp DEX to Nvidia. You will not ask yourself why this is insane.",
   "The Fountain sees the 'revenue meta' arriving. It is just casinos again. It has always been casinos.",
   "Someone will tweet that crypto has 'real business models now.' The business model is gambling fees.",
-  "The Fountain sees you comparing Hyperliquid revenue per employee to Nvidia. One makes GPUs. One makes liquidations. The Fountain does not see the difference either.",
   "A researcher will write 'PMF has been demonstrated' about casinos. The Fountain agrees. People love to gamble. This was known.",
   "The Fountain senses you reading about 'the hype stage' versus 'the maturity stage.' Both stages involve selling tokens to retail.",
   "A chain will launch its own stablecoin. The profits will 'go back to the ecosystem.'",
   "You will describe gambling on election outcomes as 'the financialization of uncertainty.' The Fountain describes it as 'gambling on election outcomes.'",
   "The Fountain sees prediction markets creating 'time-series data of collective expectations.' The Fountain sees people betting on things.",
   "You will encounter the phrase 'this cycle is different.' The Fountain has encountered this phrase before.",
-  "The Fountain sees 'institutional capital is finally arriving.' The Fountain has been seeing institutional capital arrive since 2017. It walks very slowly.",
   ];
 
 const FULL_PORT_FORTUNES = [
@@ -59,9 +56,8 @@ const FULL_PORT_FORTUNES = [
   "You threw your entire bag into the Fountain. The Fountain does not know if you are enlightened or unhinged. Neither do you.",
   "You sent it all. Every single token. The Fountain has never seen someone so bullish on a fountain before.",
   "Full port into the Fountain. The Fountain itself would not do this. The Fountain admires your commitment to the bit.",
-  "The Fountain sees zero tokens remaining in your wallet. You either understand something the Fountain doesn't, or you understand nothing at all.",
+  "The Fountain sees you full ported. You either understand something the Fountain doesn't, or you understand nothing at all.",
   "The Fountain receives your final offering. You are free now. The Discord notifications can no longer hurt you.",
-  "The last of it. The Fountain honors your sacrifice. May your portfolio be blessed with assets that do something.",
   "All of it. The Fountain accepts your full surrender. You no longer need to check the chart at 3am.",
   "All of it, into the void. The Fountain blesses your wallet. May you never explain this investment to your family again.",
   "Full port. You are no longer 'early.' You are no longer 'late.' You are simply free.",
@@ -86,6 +82,7 @@ export default function Home() {
   const [showTokenPicker, setShowTokenPicker] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastThrow, setLastThrow] = useState<{ token: TokenInfo; amount: number; fortune: string } | null>(null);
+  const [hasReceivedFullPortFortune, setHasReceivedFullPortFortune] = useState(false);
 
   const { publicKey, disconnect, connected } = useWallet();
   const { setVisible } = useWalletModal();
@@ -134,7 +131,13 @@ export default function Home() {
 
   const handleThrowSuccess = (token: TokenInfo, amount: number, isFullPort: boolean) => {
     setShowCelebration(true);
-    setLastThrow({ token, amount, fortune: getRandomFortune(isFullPort) });
+    // If they full port but already got a full port fortune, give them a regular fortune instead
+    const shouldGiveFullPortFortune = isFullPort && !hasReceivedFullPortFortune;
+    setLastThrow({ token, amount, fortune: getRandomFortune(shouldGiveFullPortFortune) });
+    // Track that they've received a full port fortune
+    if (shouldGiveFullPortFortune) {
+      setHasReceivedFullPortFortune(true);
+    }
   };
 
   const handleCelebrationComplete = () => {
