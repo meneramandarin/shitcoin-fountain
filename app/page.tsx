@@ -146,7 +146,7 @@ export default function Home() {
         </h1>
 
         {/* Fountain */}
-        <div className="my-4 flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-3">
           <img
             src="/fountain.gif"
             alt="Fountain animation"
