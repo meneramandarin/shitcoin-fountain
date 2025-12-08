@@ -3,11 +3,11 @@
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { Carattere, IBM_Plex_Mono } from 'next/font/google';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import { TokenPicker } from '@/app/TokenPicker';
 import { CelebrationScreen } from '@/app/CelebrationScreen';
-import { TokenInfo } from '@/app/solana';
+import { TokenInfo, fetchWalletTokens, FOUNTAIN_ADDRESS } from '@/app/solana';
 
 const carattere = Carattere({ subsets: ['latin'], weight: '400' });
 const ibmPlexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'] });
@@ -47,7 +47,6 @@ const FORTUNES = [
   "The Fountain senses you reading about 'the hype stage' versus 'the maturity stage.' Both stages involve selling tokens to retail.",
   "A chain will launch its own stablecoin. The profits will 'go back to the ecosystem.'",
   "You will describe gambling on election outcomes as 'the financialization of uncertainty.' The Fountain describes it as 'gambling on election outcomes.'",
-  "The Fountain sees prediction markets creating 'time-series data of collective expectations.' The Fountain sees people betting on things.",
   "You will encounter the phrase 'this cycle is different.' The Fountain has encountered this phrase before.",
   ];
 
@@ -77,6 +76,77 @@ const getRandomFortune = (isFullPort: boolean = false) => {
   return pool[Math.floor(Math.random() * pool.length)];
 };
 
+// Helper function to format large numbers with K, M, B, T suffixes
+const formatNumber = (num: number): string => {
+  if (num >= 1_000_000_000_000) {
+    return (num / 1_000_000_000_000).toFixed(2).replace(/\.00$/, '') + 'T';
+  }
+  if (num >= 1_000_000_000) {
+    return (num / 1_000_000_000).toFixed(2).replace(/\.00$/, '') + 'B';
+  }
+  if (num >= 1_000_000) {
+    return (num / 1_000_000).toFixed(2).replace(/\.00$/, '') + 'M';
+  }
+  if (num >= 1_000) {
+    return (num / 1_000).toFixed(2).replace(/\.00$/, '') + 'K';
+  }
+  return num.toFixed(2).replace(/\.00$/, '');
+};
+
+// Stats tracking
+interface TokenStats {
+  symbol: string;
+  name: string;
+  image: string;
+  amount: number;
+}
+
+const updateUserStats = (token: TokenInfo, amount: number) => {
+  const stats = JSON.parse(localStorage.getItem('userStats') || '{}');
+  const existing = stats[token.symbol];
+
+  // Handle migration from old format (number) to new format (object)
+  if (existing) {
+    if (typeof existing === 'number') {
+      // Old format: just a number, migrate to object
+      stats[token.symbol] = {
+        symbol: token.symbol,
+        name: token.name,
+        image: token.image,
+        amount: existing + amount
+      };
+    } else {
+      // New format: object with amount property
+      existing.amount += amount;
+    }
+  } else {
+    stats[token.symbol] = {
+      symbol: token.symbol,
+      name: token.name,
+      image: token.image,
+      amount: amount
+    };
+  }
+  localStorage.setItem('userStats', JSON.stringify(stats));
+};
+
+const getUserTopTokens = (): TokenStats[] => {
+  const stats = JSON.parse(localStorage.getItem('userStats') || '{}');
+  return Object.values(stats)
+    .filter((token: any) => typeof token === 'object' && token.amount !== undefined) // Only include valid objects
+    .sort((a: any, b: any) => b.amount - a.amount)
+    .slice(0, 3) as TokenStats[];
+};
+
+const getUserTotalThrown = (): number => {
+  const stats = JSON.parse(localStorage.getItem('userStats') || '{}');
+  return Object.values(stats).reduce((sum: number, token: any) => {
+    // Handle both old format (number) and new format (object)
+    const amount = typeof token === 'number' ? token : (token.amount || 0);
+    return sum + amount;
+  }, 0);
+};
+
 export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const screenshotRef = useRef<HTMLDivElement>(null);
@@ -85,9 +155,21 @@ export default function Home() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastThrow, setLastThrow] = useState<{ token: TokenInfo; amount: number; fortune: string } | null>(null);
   const [hasReceivedFullPortFortune, setHasReceivedFullPortFortune] = useState(false);
+  const [fountainTokens, setFountainTokens] = useState<TokenInfo[]>([]);
 
   const { publicKey, disconnect, connected } = useWallet();
   const { setVisible } = useWalletModal();
+
+  // Fetch fountain tokens on mount
+  useEffect(() => {
+    fetchWalletTokens(FOUNTAIN_ADDRESS.toString())
+      .then(tokens => {
+        // Sort by balance descending for "top tokens"
+        const sortedTokens = [...tokens].sort((a, b) => b.balance - a.balance);
+        setFountainTokens(sortedTokens);
+      })
+      .catch(err => console.error('Failed to fetch fountain tokens:', err));
+  }, []);
 
   const toggleSound = () => {
     const audio = audioRef.current;
@@ -140,6 +222,17 @@ export default function Home() {
     if (shouldGiveFullPortFortune) {
       setHasReceivedFullPortFortune(true);
     }
+    // Update user stats
+    updateUserStats(token, amount);
+    // Refetch fountain tokens after a delay to allow blockchain to process
+    setTimeout(() => {
+      fetchWalletTokens(FOUNTAIN_ADDRESS.toString())
+        .then(tokens => {
+          const sortedTokens = [...tokens].sort((a, b) => b.balance - a.balance);
+          setFountainTokens(sortedTokens);
+        })
+        .catch(err => console.error('Failed to fetch fountain tokens:', err));
+    }, 3000); // Wait 3 seconds for transaction to be processed
   };
 
   const handleCelebrationComplete = () => {
@@ -297,16 +390,96 @@ export default function Home() {
           </p>
         )}
 
-        {/* Success message with fortune in a box */}
+        {/* Success message with stats */}
         {lastThrow && !showCelebration && (
-          <div className="border-2 border-gray-300 rounded-lg p-5 max-w-md bg-white shadow-sm">
-            <div className="space-y-3">
-              <p className="text-gray-500 text-sm text-left">
-                You threw <span className={`${ibmPlexMono.className} text-xs`}>{lastThrow.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} {lastThrow.token.symbol}</span> into the fountain! The fountain accepts your offering and glimpses your future:
+          <div className="w-full max-w-4xl space-y-6">
+            {/* Fortune */}
+            <div className="max-w-md mx-auto space-y-3">
+              <p className="text-gray-500 text-sm text-center">
+                You threw <span className={`${ibmPlexMono.className} text-xs`}>{lastThrow.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} {lastThrow.token.symbol}</span> into the fountain! The fountain accepts your offering and glimpses into your future:
               </p>
-              <p className="text-gray-700 text-lg text-center">
-                "{lastThrow.fortune}"
-              </p>
+              <div className="border-2 border-gray-300 rounded-lg p-5 bg-white shadow-sm">
+                <p className="text-gray-700 text-lg text-center">
+                  "{lastThrow.fortune}"
+                </p>
+              </div>
+            </div>
+
+            {/* Stats side by side in one box */}
+            <div className="border-2 border-gray-300 rounded-lg p-5 bg-white shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                {/* User Stats */}
+                <div>
+                  <h3 className="text-gray-800 font-semibold text-sm mb-3">Your Offerings</h3>
+                  <div className="space-y-2">
+                    {getUserTopTokens().map((token, index) => (
+                      <div key={token.symbol} className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-600">#{index + 1}</span>
+                        {token.image ? (
+                          <img
+                            src={token.image}
+                            alt={token.symbol}
+                            className="w-5 h-5 rounded-full bg-gray-200"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-xs">
+                            ?
+                          </div>
+                        )}
+                        <span className="text-gray-700 flex-1">{token.symbol}</span>
+                        <span className={`${ibmPlexMono.className} text-xs text-gray-700`}>
+                          {formatNumber(token.amount)}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="pt-2 border-t border-gray-200 flex justify-between text-sm font-semibold">
+                      <span className="text-gray-700">Total Thrown</span>
+                      <span className={`${ibmPlexMono.className} text-xs text-gray-800`}>
+                        {formatNumber(getUserTotalThrown())}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Global Stats */}
+                <div>
+                  <h3 className="text-gray-800 font-semibold text-sm mb-3">The Fountain's Treasury</h3>
+                  <div className="space-y-2">
+                    {fountainTokens.slice(0, 3).map((token, index) => (
+                      <div key={token.mint} className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-600">#{index + 1}</span>
+                        {token.image ? (
+                          <img
+                            src={token.image}
+                            alt={token.symbol}
+                            className="w-5 h-5 rounded-full bg-gray-200"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-xs">
+                            ?
+                          </div>
+                        )}
+                        <span className="text-gray-700 flex-1">{token.symbol}</span>
+                        <span className={`${ibmPlexMono.className} text-xs text-gray-700`}>
+                          {formatNumber(token.balance)}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="pt-2 border-t border-gray-200 flex justify-between text-sm font-semibold">
+                      <span className="text-gray-700">Total Tokens</span>
+                      <span className={`${ibmPlexMono.className} text-xs text-gray-800`}>
+                        {fountainTokens.length}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
