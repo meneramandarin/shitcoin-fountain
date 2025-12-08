@@ -335,10 +335,10 @@ export default function Home() {
 
       {/* Share on X button - positioned below the fortune box */}
       {lastThrow && !showCelebration && (
-        <div className="relative w-full max-w-md z-10 -mt-3">
+        <div className="flex justify-end max-w-md w-full z-10 mt-1 px-8 sm:px-0">
           <button
             onClick={handleShareOnX}
-            className="absolute right-0 text-xs text-gray-600 hover:text-black underline transition"
+            className="text-xs text-gray-600 hover:text-black underline transition"
             type="button"
           >
             Share on X
