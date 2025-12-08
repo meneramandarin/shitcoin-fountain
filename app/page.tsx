@@ -192,7 +192,7 @@ export default function Home() {
         {lastThrow && !showCelebration && (
           <div className="text-center max-w-md space-y-3">
             <p className="text-gray-700 text-lg">
-              You threw <span className={ibmPlexMono.className}>{lastThrow.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</span> {lastThrow.token.symbol} into the fountain! The fountain thanks you for your sacrifice. Here's what it sees in your future:
+              You threw <span className={`${ibmPlexMono.className} text-base`}>{lastThrow.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} {lastThrow.token.symbol}</span> into the fountain! The fountain thanks you for your sacrifice. Here's what it sees in your future:
             </p>
             <p className="text-gray-700 text-lg">
               "{lastThrow.fortune}"
