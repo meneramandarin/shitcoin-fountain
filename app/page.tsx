@@ -264,12 +264,17 @@ export default function Home() {
           // Add inline styles to override any lab() colors in the cloned document
           const clonedElement = clonedDoc.querySelector('[data-screenshot]');
           if (clonedElement) {
-            const greyTextElements = clonedElement.querySelectorAll('.text-gray-500');
-            greyTextElements.forEach((el) => {
+            // Fix all gray text colors
+            const gray500Elements = clonedElement.querySelectorAll('.text-gray-500');
+            gray500Elements.forEach((el) => {
               (el as HTMLElement).style.color = 'rgb(107, 114, 128)'; // Tailwind gray-500
             });
 
-            // Find other grey elements
+            const gray600Elements = clonedElement.querySelectorAll('.text-gray-600');
+            gray600Elements.forEach((el) => {
+              (el as HTMLElement).style.color = 'rgb(75, 85, 99)'; // Tailwind gray-600
+            });
+
             const gray700Elements = clonedElement.querySelectorAll('.text-gray-700');
             gray700Elements.forEach((el) => {
               (el as HTMLElement).style.color = 'rgb(55, 65, 81)'; // Tailwind gray-700
@@ -280,10 +285,26 @@ export default function Home() {
               (el as HTMLElement).style.color = 'rgb(31, 41, 55)'; // Tailwind gray-800
             });
 
-            // Set border color explicitly
-            const borderedElements = clonedElement.querySelectorAll('.border-gray-300');
-            borderedElements.forEach((el) => {
+            // Fix border colors
+            const borderGray300Elements = clonedElement.querySelectorAll('.border-gray-300');
+            borderGray300Elements.forEach((el) => {
               (el as HTMLElement).style.borderColor = 'rgb(209, 213, 219)'; // Tailwind gray-300
+            });
+
+            const borderGray200Elements = clonedElement.querySelectorAll('.border-gray-200');
+            borderGray200Elements.forEach((el) => {
+              (el as HTMLElement).style.borderColor = 'rgb(229, 231, 235)'; // Tailwind gray-200
+            });
+
+            // Fix background colors
+            const bgGray200Elements = clonedElement.querySelectorAll('.bg-gray-200');
+            bgGray200Elements.forEach((el) => {
+              (el as HTMLElement).style.backgroundColor = 'rgb(229, 231, 235)'; // Tailwind gray-200
+            });
+
+            const bgGray300Elements = clonedElement.querySelectorAll('.bg-gray-300');
+            bgGray300Elements.forEach((el) => {
+              (el as HTMLElement).style.backgroundColor = 'rgb(209, 213, 219)'; // Tailwind gray-300
             });
           }
         },
@@ -474,7 +495,7 @@ export default function Home() {
                     <div className="pt-2 border-t border-gray-200 flex justify-between text-sm font-semibold">
                       <span className="text-gray-700">Total Tokens</span>
                       <span className={`${ibmPlexMono.className} text-xs text-gray-800`}>
-                        {fountainTokens.length}
+                        {formatNumber(fountainTokens.reduce((sum, token) => sum + token.balance, 0))}
                       </span>
                     </div>
                   </div>
