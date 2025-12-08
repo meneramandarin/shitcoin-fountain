@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react";
 import { Providers } from "./providers";
 import "./globals.css";
 import { Buenard } from "next/font/google";
@@ -49,6 +50,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={buenard.className}>
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   );
