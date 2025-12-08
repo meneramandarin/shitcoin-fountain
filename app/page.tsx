@@ -3,16 +3,14 @@
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { Carattere } from 'next/font/google';
-import { useRef, useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRef, useState } from 'react';
 import { TokenPicker } from '@/app/TokenPicker';
 import { CelebrationScreen } from '@/app/CelebrationScreen';
 import { TokenInfo } from '@/app/solana';
 
 const carattere = Carattere({ subsets: ['latin'], weight: '400' });
 
-function HomeContent() {
-  const searchParams = useSearchParams();
+export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [muted, setMuted] = useState(true);
   const [showTokenPicker, setShowTokenPicker] = useState(false);
@@ -21,36 +19,6 @@ function HomeContent() {
 
   const { publicKey, disconnect, connected } = useWallet();
   const { setVisible } = useWalletModal();
-
-  // Development mode: URL query params for testing UI states
-  useEffect(() => {
-    if (process.env.NODE_ENV !== 'development') return;
-
-    const showCelebrationParam = searchParams.get('celebration');
-    const showSuccessParam = searchParams.get('success');
-
-    if (showCelebrationParam === 'true') {
-      setShowCelebration(true);
-    }
-
-    if (showSuccessParam === 'true') {
-      const tokenSymbol = searchParams.get('token') || 'BONK';
-      const tokenAmount = parseInt(searchParams.get('amount') || '1000');
-
-      setLastThrow({
-        token: {
-          mint: 'mock-mint-address',
-          symbol: tokenSymbol,
-          name: tokenSymbol,
-          image: '',
-          balance: tokenAmount,
-          decimals: 6,
-          usdValue: undefined
-        },
-        amount: tokenAmount
-      });
-    }
-  }, [searchParams]);
 
   const toggleSound = () => {
     const audio = audioRef.current;
@@ -241,13 +209,5 @@ function HomeContent() {
         onComplete={handleCelebrationComplete}
       />
     </div>
-  );
-}
-
-export default function Home() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-white" />}>
-      <HomeContent />
-    </Suspense>
   );
 }
