@@ -43,7 +43,6 @@ const FORTUNES = [
   "You will compare a perp DEX to Nvidia. You will not ask yourself why this is insane.",
   "The Fountain sees the 'revenue meta' arriving. It is just casinos again. It has always been casinos.",
   "Someone will tweet that crypto has 'real business models now.' The business model is gambling fees.",
-  "The Fountain sees VCs tweeting about 'sustainable revenue.' The revenue is from people losing money faster than they can deposit it.",
   "The Fountain sees you comparing Hyperliquid revenue per employee to Nvidia. One makes GPUs. One makes liquidations. The Fountain does not see the difference either.",
   "A researcher will write 'PMF has been demonstrated' about casinos. The Fountain agrees. People love to gamble. This was known.",
   "The Fountain senses you reading about 'the hype stage' versus 'the maturity stage.' Both stages involve selling tokens to retail.",
@@ -52,7 +51,6 @@ const FORTUNES = [
   "The Fountain sees prediction markets creating 'time-series data of collective expectations.' The Fountain sees people betting on things.",
   "You will encounter the phrase 'this cycle is different.' The Fountain has encountered this phrase before.",
   "The Fountain sees 'institutional capital is finally arriving.' The Fountain has been seeing institutional capital arrive since 2017. It walks very slowly.",
-  "A VC will tweet that 'narrative-driven valuations' are being replaced by 'cash-flow-driven valuations.' The next week they will invest in a memecoin.",
   ];
 
 const FULL_PORT_FORTUNES = [
@@ -250,14 +248,6 @@ export default function Home() {
             </span>
           </button>
         )}
-
-        {/* Mobile garnish row */}
-        <div className="sm:hidden fixed bottom-0 left-0 right-0 px-6 pointer-events-none">
-          <div className="flex items-end justify-between">
-            <img src="/flowers.png" alt="" className="w-24 h-24" />
-            <img src="/cherub.png" alt="" className="w-20 h-auto" />
-          </div>
-        </div>
 
       </div>
 
