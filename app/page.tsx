@@ -65,6 +65,13 @@ const FULL_PORT_FORTUNES = [
   "All of it. The Fountain accepts your full surrender. You no longer need to check the chart at 3am.",
   "All of it, into the void. The Fountain blesses your wallet. May you never explain this investment to your family again.",
   "Full port. You are no longer 'early.' You are no longer 'late.' You are simply free.",
+  "You held nothing back. The Fountain holds nothing back either: you were never going to sell the top anyway.",
+  "The Fountain receives everything. Your bags, your hopes, your price alerts. Rest now.",
+  "You gave the Fountain all of it. The Fountain gives you permission to stop pretending you had a thesis.",
+  "Full port. The Telegram group will wonder where you went. Let them wonder.",
+  "The Fountain accepts your entire position. Somewhere, a token founder just felt a chill.",
+  "Everything. All at once. The Fountain sees you were never here for the tech.",
+  "The Fountain notes you held this for 11 months hoping for a revival. The revival is not coming. The Fountain is the revival.",
 ];
 
 // Get a random fortune
