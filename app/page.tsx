@@ -4,6 +4,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { Carattere, IBM_Plex_Mono } from 'next/font/google';
 import { useRef, useState } from 'react';
+import html2canvas from 'html2canvas';
 import { TokenPicker } from '@/app/TokenPicker';
 import { CelebrationScreen } from '@/app/CelebrationScreen';
 import { TokenInfo } from '@/app/solana';
@@ -78,6 +79,7 @@ const getRandomFortune = (isFullPort: boolean = false) => {
 
 export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const screenshotRef = useRef<HTMLDivElement>(null);
   const [muted, setMuted] = useState(true);
   const [showTokenPicker, setShowTokenPicker] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -149,6 +151,93 @@ export default function Home() {
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
   };
 
+  const handleShareOnX = async () => {
+    if (!screenshotRef.current) {
+      console.error('Screenshot ref not found');
+      return;
+    }
+
+    try {
+      console.log('Starting screenshot generation...');
+
+      // Generate screenshot using html2canvas with onclone to fix lab() colors
+      const canvas = await html2canvas(screenshotRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        onclone: (clonedDoc) => {
+          // Add inline styles to override any lab() colors in the cloned document
+          const clonedElement = clonedDoc.querySelector('[data-screenshot]');
+          if (clonedElement) {
+            // Find the grey text paragraph and force its color
+            const greyTextElements = clonedElement.querySelectorAll('.text-gray-500');
+            greyTextElements.forEach((el) => {
+              (el as HTMLElement).style.color = 'rgb(107, 114, 128)'; // Tailwind gray-500
+            });
+
+            // Find other grey elements
+            const gray700Elements = clonedElement.querySelectorAll('.text-gray-700');
+            gray700Elements.forEach((el) => {
+              (el as HTMLElement).style.color = 'rgb(55, 65, 81)'; // Tailwind gray-700
+            });
+
+            const gray800Elements = clonedElement.querySelectorAll('.text-gray-800');
+            gray800Elements.forEach((el) => {
+              (el as HTMLElement).style.color = 'rgb(31, 41, 55)'; // Tailwind gray-800
+            });
+
+            // Set border color explicitly
+            const borderedElements = clonedElement.querySelectorAll('.border-gray-300');
+            borderedElements.forEach((el) => {
+              (el as HTMLElement).style.borderColor = 'rgb(209, 213, 219)'; // Tailwind gray-300
+            });
+          }
+        },
+      });
+
+      console.log('Canvas generated:', canvas.width, 'x', canvas.height);
+
+      // Convert canvas to blob
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          console.error('Failed to create blob from canvas');
+          alert('Failed to create image. Please try again.');
+          return;
+        }
+
+        console.log('Blob created:', blob.size, 'bytes');
+
+        // Copy to clipboard
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'image/png': blob,
+            }),
+          ]);
+
+          console.log('Image copied to clipboard!');
+
+          // Open Twitter with pre-filled text
+          const tweetText = encodeURIComponent(
+            'I threw my shitcoins into the fountain 🪙💫\n\nshitcoinfountain.com'
+          );
+          window.open(
+            `https://twitter.com/intent/tweet?text=${tweetText}`,
+            '_blank'
+          );
+        } catch (clipboardErr) {
+          console.error('Clipboard error:', clipboardErr);
+          alert('Failed to copy image to clipboard. Please try again.');
+        }
+      }, 'image/png');
+    } catch (err) {
+      console.error('Screenshot generation error:', err);
+      alert(`Failed to generate screenshot: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-start px-8 pb-36 sm:pb-12 pt-24 sm:pt-28 relative overflow-hidden">
       {/* Top controls */}
@@ -178,8 +267,8 @@ export default function Home() {
         <img src="/cherub.png" alt="" className="w-24 h-auto" />
       </div>
 
-      {/* Main content */}
-      <div className="flex flex-col items-center gap-5 z-10">
+      {/* Main content - this is what gets captured in screenshot */}
+      <div ref={screenshotRef} data-screenshot className="flex flex-col items-center gap-8 z-10 bg-white px-12 py-10">
 
         {/* Title */}
         <h1 className={`${carattere.className} text-5xl sm:text-6xl italic text-gray-800 text-center whitespace-nowrap`}>
@@ -209,15 +298,17 @@ export default function Home() {
           </p>
         )}
 
-        {/* Success message with fortune */}
+        {/* Success message with fortune in a box */}
         {lastThrow && !showCelebration && (
-          <div className="text-center max-w-md space-y-3">
-            <p className="text-gray-700 text-lg">
-              You threw <span className={`${ibmPlexMono.className} text-base`}>{lastThrow.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} {lastThrow.token.symbol}</span> into the fountain! The fountain thanks you for your sacrifice. Here's what it sees in your future:
-            </p>
-            <p className="text-gray-700 text-lg">
-              "{lastThrow.fortune}"
-            </p>
+          <div className="border-2 border-gray-300 rounded-lg p-5 max-w-md bg-white shadow-sm">
+            <div className="space-y-3">
+              <p className="text-gray-500 text-sm text-left">
+                You threw <span className={`${ibmPlexMono.className} text-xs`}>{lastThrow.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} {lastThrow.token.symbol}</span> into the fountain! The fountain accepts your offering and glimpses your future:
+              </p>
+              <p className="text-gray-700 text-lg text-center">
+                "{lastThrow.fortune}"
+              </p>
+            </div>
           </div>
         )}
 
@@ -240,26 +331,39 @@ export default function Home() {
           </button>
         )}
 
-        {/* Do it again button - show after success message */}
-        {lastThrow && !showCelebration && (
-          <button
-            type="button"
-            onClick={handleThrowClick}
-            className="relative w-45 hover:scale-105 transition"
-            aria-label="Do it again!"
-          >
-            <img
-              src="/button.png"
-              alt=""
-              className="block w-full h-auto"
-            />
-            <span className="absolute inset-0 flex items-center justify-center text-black font-semibold drop-shadow">
-              Do it again!
-            </span>
-          </button>
-        )}
-
       </div>
+
+      {/* Share on X button - positioned below the fortune box */}
+      {lastThrow && !showCelebration && (
+        <div className="relative w-full max-w-md z-10 -mt-3">
+          <button
+            onClick={handleShareOnX}
+            className="absolute right-0 text-xs text-gray-600 hover:text-black underline transition"
+            type="button"
+          >
+            Share on X
+          </button>
+        </div>
+      )}
+
+      {/* Do it again button - show after success message */}
+      {lastThrow && !showCelebration && (
+        <button
+          type="button"
+          onClick={handleThrowClick}
+          className="relative w-45 hover:scale-105 transition z-10 mt-3"
+          aria-label="Do it again!"
+        >
+          <img
+            src="/button.png"
+            alt=""
+            className="block w-full h-auto"
+          />
+          <span className="absolute inset-0 flex items-center justify-center text-black font-semibold drop-shadow">
+            Do it again!
+          </span>
+        </button>
+      )}
 
       {/* Flowers - desktop */}
       <div className="hidden sm:block sm:fixed sm:bottom-0 sm:left-0 pointer-events-none">
