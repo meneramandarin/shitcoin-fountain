@@ -12,7 +12,7 @@ const ibmPlexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'] }
 interface TokenPickerProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (token: TokenInfo, amount: number) => void;
+  onSuccess: (token: TokenInfo, amount: number, isFullPort: boolean) => void;
 }
 
 export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
@@ -70,11 +70,14 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
       );
 
       const signature = await sendTransaction(transaction, connection);
-      
+
       // Wait for confirmation
       await connection.confirmTransaction(signature, 'confirmed');
-      
-      onSuccess(selectedToken, numAmount);
+
+      // Check if this is a full port (amount equals balance)
+      const isFullPort = numAmount === selectedToken.balance;
+
+      onSuccess(selectedToken, numAmount, isFullPort);
       onClose();
     } catch (err: any) {
       console.error('Throw failed:', err);

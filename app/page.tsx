@@ -45,8 +45,6 @@ const FORTUNES = [
   "Someone will tweet that crypto has 'real business models now.' The business model is gambling fees.",
   "The Fountain sees VCs tweeting about 'sustainable revenue.' The revenue is from people losing money faster than they can deposit it.",
   "The Fountain sees you comparing Hyperliquid revenue per employee to Nvidia. One makes GPUs. One makes liquidations. The Fountain does not see the difference either.",
-  "The Fountain senses 83% of institutional investors plan to increase digital asset allocation. The Fountain has seen this survey every year since 2017.",
-  "The Fountain sees the 'fat head, chunky middle, long tail' framework for perp markets. The Fountain sees only the long tail of liquidated traders.",
   "A researcher will write 'PMF has been demonstrated' about casinos. The Fountain agrees. People love to gamble. This was known.",
   "The Fountain senses you reading about 'the hype stage' versus 'the maturity stage.' Both stages involve selling tokens to retail.",
   "A chain will launch its own stablecoin. The profits will 'go back to the ecosystem.'",
@@ -57,9 +55,24 @@ const FORTUNES = [
   "A VC will tweet that 'narrative-driven valuations' are being replaced by 'cash-flow-driven valuations.' The next week they will invest in a memecoin.",
   ];
 
-// Get a random fortune (deterministic based on seed for consistency)
-const getRandomFortune = () => {
-  return FORTUNES[Math.floor(Math.random() * FORTUNES.length)];
+const FULL_PORT_FORTUNES = [
+  "You full ported. The Fountain has seen whales. The Fountain has seen degens. You are something else entirely.",
+  "The Fountain appreciates the full send. Your risk management is non-existent. The Fountain respects this.",
+  "You threw your entire bag into the Fountain. The Fountain does not know if you are enlightened or unhinged. Neither do you.",
+  "You sent it all. Every single token. The Fountain has never seen someone so bullish on a fountain before.",
+  "Full port into the Fountain. The Fountain itself would not do this. The Fountain admires your commitment to the bit.",
+  "The Fountain sees zero tokens remaining in your wallet. You either understand something the Fountain doesn't, or you understand nothing at all.",
+  "The Fountain receives your final offering. You are free now. The Discord notifications can no longer hurt you.",
+  "The last of it. The Fountain honors your sacrifice. May your portfolio be blessed with assets that do something.",
+  "All of it. The Fountain accepts your full surrender. You no longer need to check the chart at 3am.",
+  "All of it, into the void. The Fountain blesses your wallet. May you never explain this investment to your family again.",
+  "Full port. You are no longer 'early.' You are no longer 'late.' You are simply free.",
+];
+
+// Get a random fortune
+const getRandomFortune = (isFullPort: boolean = false) => {
+  const pool = isFullPort ? FULL_PORT_FORTUNES : FORTUNES;
+  return pool[Math.floor(Math.random() * pool.length)];
 };
 
 export default function Home() {
@@ -114,9 +127,9 @@ export default function Home() {
     }
   };
 
-  const handleThrowSuccess = (token: TokenInfo, amount: number) => {
+  const handleThrowSuccess = (token: TokenInfo, amount: number, isFullPort: boolean) => {
     setShowCelebration(true);
-    setLastThrow({ token, amount, fortune: getRandomFortune() });
+    setLastThrow({ token, amount, fortune: getRandomFortune(isFullPort) });
   };
 
   const handleCelebrationComplete = () => {
