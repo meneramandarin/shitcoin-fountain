@@ -171,7 +171,6 @@ export default function Home() {
           // Add inline styles to override any lab() colors in the cloned document
           const clonedElement = clonedDoc.querySelector('[data-screenshot]');
           if (clonedElement) {
-            // Find the grey text paragraph and force its color
             const greyTextElements = clonedElement.querySelectorAll('.text-gray-500');
             greyTextElements.forEach((el) => {
               (el as HTMLElement).style.color = 'rgb(107, 114, 128)'; // Tailwind gray-500
@@ -333,15 +332,15 @@ export default function Home() {
 
       </div>
 
-      {/* Share on X button - positioned below the fortune box */}
+      {/* Share on X button - positioned below the fortune box (desktop only) */}
       {lastThrow && !showCelebration && (
-        <div className="flex justify-end max-w-md w-full z-10 mt-1 px-8 sm:px-0">
+        <div className="hidden sm:flex justify-end max-w-md w-full z-10 -mt-5">
           <button
             onClick={handleShareOnX}
             className="text-xs text-gray-600 hover:text-black underline transition"
             type="button"
           >
-            Share on X
+            Copy image & share on X
           </button>
         </div>
       )}
