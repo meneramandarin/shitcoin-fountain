@@ -160,11 +160,13 @@ export default function Home() {
           />
         </div>
 
-        {/* Tagline */}
-        <p className="text-center text-gray-700 text-lg max-w-md">
-          Throw a shitcoin.<br />
-          Make a wish.
-        </p>
+        {/* Tagline - only show if no celebration or success message */}
+        {!showCelebration && !lastThrow && (
+          <p className="text-center text-gray-700 text-lg max-w-md">
+            Throw a shitcoin.<br />
+            Make a wish.
+          </p>
+        )}
 
         {/* Success message */}
         {lastThrow && !showCelebration && (
@@ -173,22 +175,43 @@ export default function Home() {
           </div>
         )}
 
-        {/* Throw button */}
-        <button
-          type="button"
-          onClick={handleThrowClick}
-          className="relative w-45 hover:scale-105 transition"
-          aria-label="Throw a Shitcoin"
-        >
-          <img
-            src="/button.png"
-            alt=""
-            className="block w-full h-auto"
-          />
-          <span className="absolute inset-0 flex items-center justify-center text-black font-semibold drop-shadow">
-            Throw a Shitcoin
-          </span>
-        </button>
+        {/* Throw button - only show if no celebration or success message */}
+        {!showCelebration && !lastThrow && (
+          <button
+            type="button"
+            onClick={handleThrowClick}
+            className="relative w-45 hover:scale-105 transition"
+            aria-label="Throw a Shitcoin"
+          >
+            <img
+              src="/button.png"
+              alt=""
+              className="block w-full h-auto"
+            />
+            <span className="absolute inset-0 flex items-center justify-center text-black font-semibold drop-shadow">
+              Throw a Shitcoin
+            </span>
+          </button>
+        )}
+
+        {/* Do it again button - show after success message */}
+        {lastThrow && !showCelebration && (
+          <button
+            type="button"
+            onClick={handleThrowClick}
+            className="relative w-45 hover:scale-105 transition"
+            aria-label="Do it again!"
+          >
+            <img
+              src="/button.png"
+              alt=""
+              className="block w-full h-auto"
+            />
+            <span className="absolute inset-0 flex items-center justify-center text-black font-semibold drop-shadow">
+              Do it again!
+            </span>
+          </button>
+        )}
 
         {/* Mobile garnish row */}
         <div className="sm:hidden fixed bottom-0 left-0 right-0 px-6 pointer-events-none">
