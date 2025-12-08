@@ -227,7 +227,7 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="0.00"
-                    className={`flex-1 px-2 py-1 border border-blue-900/30 bg-white/80 focus:outline-none focus:border-blue-900 text-black text-sm ${ibmPlexMono.className}`}
+                    className={`flex-1 px-2 py-1 border border-blue-900/30 bg-white/80 focus:outline-none focus:border-blue-900 text-black text-base ${ibmPlexMono.className}`}
                     max={selectedToken.balance}
                     step="any"
                   />
