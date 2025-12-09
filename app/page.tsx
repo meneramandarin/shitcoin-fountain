@@ -4,7 +4,6 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { Carattere, IBM_Plex_Mono } from 'next/font/google';
 import { useRef, useState, useEffect } from 'react';
-import html2canvas from 'html2canvas';
 import { TokenPicker } from '@/app/TokenPicker';
 import { CelebrationScreen } from '@/app/CelebrationScreen';
 import { TokenInfo, fetchWalletTokens, FOUNTAIN_ADDRESS } from '@/app/solana';
@@ -245,72 +244,170 @@ export default function Home() {
   };
 
   const handleShareOnX = async () => {
-    if (!screenshotRef.current) {
-      console.error('Screenshot ref not found');
+    if (!lastThrow || !screenshotRef.current) {
+      console.error('No throw data or screenshot ref available');
       return;
     }
 
     try {
-      console.log('Starting screenshot generation...');
+      console.log('Starting template-based share image generation...');
 
-      // Generate screenshot using html2canvas with onclone to fix lab() colors
-      const canvas = await html2canvas(screenshotRef.current, {
+      // First, capture the stats box from the UI
+      const html2canvas = (await import('html2canvas')).default;
+      const statsBox = screenshotRef.current.querySelector('[data-stats-box]') as HTMLElement;
+
+      if (!statsBox) {
+        throw new Error('Stats box not found in DOM');
+      }
+
+      const statsCanvas = await html2canvas(statsBox, {
         backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
         allowTaint: true,
         logging: false,
         onclone: (clonedDoc) => {
-          // Add inline styles to override any lab() colors in the cloned document
-          const clonedElement = clonedDoc.querySelector('[data-screenshot]');
+          // Fix all elements in the entire cloned document
+          const allElements = clonedDoc.querySelectorAll('*');
+          allElements.forEach((el) => {
+            const htmlEl = el as HTMLElement;
+            const computedStyle = window.getComputedStyle(el);
+
+            // Fix text colors
+            if (computedStyle.color.includes('lab(')) {
+              htmlEl.style.color = 'rgb(0, 0, 0)';
+            }
+
+            // Fix background colors
+            if (computedStyle.backgroundColor.includes('lab(')) {
+              htmlEl.style.backgroundColor = 'rgb(255, 255, 255)';
+            }
+
+            // Fix border colors
+            if (computedStyle.borderColor.includes('lab(')) {
+              htmlEl.style.borderColor = 'rgb(209, 213, 219)';
+            }
+          });
+
+          // Specific fixes for known gray classes
+          const clonedElement = clonedDoc.querySelector('[data-stats-box]');
           if (clonedElement) {
             // Fix all gray text colors
             const gray500Elements = clonedElement.querySelectorAll('.text-gray-500');
             gray500Elements.forEach((el) => {
-              (el as HTMLElement).style.color = 'rgb(107, 114, 128)'; // Tailwind gray-500
+              (el as HTMLElement).style.color = 'rgb(107, 114, 128)';
             });
 
             const gray600Elements = clonedElement.querySelectorAll('.text-gray-600');
             gray600Elements.forEach((el) => {
-              (el as HTMLElement).style.color = 'rgb(75, 85, 99)'; // Tailwind gray-600
+              (el as HTMLElement).style.color = 'rgb(75, 85, 99)';
             });
 
             const gray700Elements = clonedElement.querySelectorAll('.text-gray-700');
             gray700Elements.forEach((el) => {
-              (el as HTMLElement).style.color = 'rgb(55, 65, 81)'; // Tailwind gray-700
+              (el as HTMLElement).style.color = 'rgb(55, 65, 81)';
             });
 
             const gray800Elements = clonedElement.querySelectorAll('.text-gray-800');
             gray800Elements.forEach((el) => {
-              (el as HTMLElement).style.color = 'rgb(31, 41, 55)'; // Tailwind gray-800
+              (el as HTMLElement).style.color = 'rgb(31, 41, 55)';
             });
 
             // Fix border colors
-            const borderGray300Elements = clonedElement.querySelectorAll('.border-gray-300');
-            borderGray300Elements.forEach((el) => {
-              (el as HTMLElement).style.borderColor = 'rgb(209, 213, 219)'; // Tailwind gray-300
-            });
-
             const borderGray200Elements = clonedElement.querySelectorAll('.border-gray-200');
             borderGray200Elements.forEach((el) => {
-              (el as HTMLElement).style.borderColor = 'rgb(229, 231, 235)'; // Tailwind gray-200
+              (el as HTMLElement).style.borderColor = 'rgb(229, 231, 235)';
+            });
+
+            const borderGray300Elements = clonedElement.querySelectorAll('.border-gray-300');
+            borderGray300Elements.forEach((el) => {
+              (el as HTMLElement).style.borderColor = 'rgb(209, 213, 219)';
             });
 
             // Fix background colors
+            const bgWhiteElements = clonedElement.querySelectorAll('.bg-white');
+            bgWhiteElements.forEach((el) => {
+              (el as HTMLElement).style.backgroundColor = 'rgb(255, 255, 255)';
+            });
+
             const bgGray200Elements = clonedElement.querySelectorAll('.bg-gray-200');
             bgGray200Elements.forEach((el) => {
-              (el as HTMLElement).style.backgroundColor = 'rgb(229, 231, 235)'; // Tailwind gray-200
+              (el as HTMLElement).style.backgroundColor = 'rgb(229, 231, 235)';
             });
 
             const bgGray300Elements = clonedElement.querySelectorAll('.bg-gray-300');
             bgGray300Elements.forEach((el) => {
-              (el as HTMLElement).style.backgroundColor = 'rgb(209, 213, 219)'; // Tailwind gray-300
+              (el as HTMLElement).style.backgroundColor = 'rgb(209, 213, 219)';
             });
           }
         },
       });
 
-      console.log('Canvas generated:', canvas.width, 'x', canvas.height);
+      // Load the template image
+      const templateImg = new Image();
+      templateImg.crossOrigin = 'anonymous';
+
+      await new Promise((resolve, reject) => {
+        templateImg.onload = resolve;
+        templateImg.onerror = reject;
+        templateImg.src = '/Share button.png';
+      });
+
+      // Create canvas matching template size
+      const canvas = document.createElement('canvas');
+      canvas.width = templateImg.width;
+      canvas.height = templateImg.height;
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) throw new Error('Failed to get canvas context');
+
+      // Draw template image
+      ctx.drawImage(templateImg, 0, 0);
+
+      // Configure text styles for fortune quote
+      ctx.fillStyle = '#000000';
+      ctx.font = 'italic 35px Georgia, serif';
+      ctx.textAlign = 'left';
+
+      // Draw the fortune quote - constrained to left third only
+      const quoteX = canvas.width * 0.08; // Left side positioning
+      const quoteStartY = canvas.height * 0.30; // Middle of 2nd quarter (25-50%)
+      const maxWidth = canvas.width * 0.25; // Only 25% of canvas width (left third minus margins)
+      const lineHeight = 43;
+      const words = lastThrow.fortune.split(' ');
+      let line = '';
+
+      // Word wrap the fortune
+      const lines: string[] = [];
+      for (let i = 0; i < words.length; i++) {
+        const testLine = line + words[i] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && i > 0) {
+          lines.push(line);
+          line = words[i] + ' ';
+        } else {
+          line = testLine;
+        }
+      }
+      lines.push(line);
+
+      // Draw each line with quotes
+      lines.forEach((textLine, index) => {
+        let textToDraw = textLine.trim();
+        if (index === 0) textToDraw = '"' + textToDraw;
+        if (index === lines.length - 1) textToDraw = textToDraw + '"';
+        ctx.fillText(textToDraw, quoteX, quoteStartY + index * lineHeight);
+      });
+
+      // Draw the stats box screenshot in the bottom third, centered
+      const statsBoxWidth = statsCanvas.width;
+      const statsBoxHeight = statsCanvas.height;
+      const statsBoxX = (canvas.width - statsBoxWidth) / 2;
+      const statsBoxY = (canvas.height * 2 / 3) + ((canvas.height / 3 - statsBoxHeight) / 2);
+
+      ctx.drawImage(statsCanvas, statsBoxX, statsBoxY);
+
+      console.log('Template image generated with overlay');
 
       // Convert canvas to blob
       canvas.toBlob(async (blob) => {
@@ -334,7 +431,7 @@ export default function Home() {
 
           // Open Twitter with pre-filled text
           const tweetText = encodeURIComponent(
-            'I threw my shitcoins into the fountain 🪙💫\n\nshitcoinfountain.com'
+            'I threw my shitcoins into a fountain 🪙💫\n\nshitcoinfountain.com'
           );
           window.open(
             `https://twitter.com/intent/tweet?text=${tweetText}`,
@@ -346,8 +443,8 @@ export default function Home() {
         }
       }, 'image/png');
     } catch (err) {
-      console.error('Screenshot generation error:', err);
-      alert(`Failed to generate screenshot: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      console.error('Share image generation error:', err);
+      alert(`Failed to generate share image: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
@@ -427,7 +524,7 @@ export default function Home() {
             </div>
 
             {/* Stats side by side in one box */}
-            <div className="border-2 border-gray-300 rounded-lg p-5 bg-white shadow-sm">
+            <div data-stats-box className="border-2 border-gray-300 rounded-lg p-5 bg-white shadow-sm">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                 {/* User Stats */}
                 <div>
