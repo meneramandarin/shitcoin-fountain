@@ -386,8 +386,8 @@ export default function Home() {
 
       // Draw the fortune quote - constrained to left third only
       const quoteX = canvas.width * 0.08; // Left side positioning
-      const quoteStartY = canvas.height * 0.30; // Middle of 2nd quarter (25-50%)
-      const maxWidth = canvas.width * 0.25; // Only 25% of canvas width (left third minus margins)
+      const quoteStartY = canvas.height * 0.27; // Slightly higher than middle of 2nd quarter
+      const maxWidth = canvas.width * 0.28; // Slightly wider for fewer line breaks
       const lineHeight = 43;
       const words = lastThrow.fortune.split(' ');
       let line = '';
