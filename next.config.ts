@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
+import path from "path";
 
-// Must be relative for Turbopack; resolves from this config file.
-const emptyModule = "./stubs/empty-module.ts";
+// Use absolute path for better compatibility with both webpack and turbopack
+const emptyModule = path.resolve(__dirname, "stubs/empty-module.ts");
 
 const nextConfig: NextConfig = {
   // Turbopack is default in Next 16; mirror aliases for both bundlers
