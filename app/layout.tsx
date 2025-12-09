@@ -26,9 +26,9 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/preview.png",
+        url: `${baseUrl}/preview.png`,
         width: 1200,
-        height: 1200,
+        height: 630,
         alt: "Shitcoin Fountain preview",
       },
     ],
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Shitcoin Fountain",
     description: "Yeet your garbage tokens into the magical wishing well.",
-    images: ["/preview.png"],
+    images: [`${baseUrl}/preview.png`],
   },
 };
 
