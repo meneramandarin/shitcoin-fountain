@@ -50,7 +50,7 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
 
   const handleThrow = async () => {
     if (!selectedToken || !publicKey || !amount) return;
-    
+
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0 || numAmount > selectedToken.balance) {
       setError('Invalid amount');
@@ -69,10 +69,32 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
         selectedToken.decimals
       );
 
-      const signature = await sendTransaction(transaction, connection);
+      // Send transaction with preflight checks
+      const signature = await sendTransaction(transaction, connection, {
+        skipPreflight: false,
+        preflightCommitment: 'confirmed',
+        maxRetries: 3,
+      });
 
-      // Wait for confirmation
-      await connection.confirmTransaction(signature, 'confirmed');
+      console.log('Transaction sent:', signature);
+
+      // Wait for confirmation with proper error handling
+      const latestBlockhash = await connection.getLatestBlockhash('finalized');
+
+      const confirmation = await connection.confirmTransaction(
+        {
+          signature,
+          blockhash: latestBlockhash.blockhash,
+          lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+        },
+        'confirmed'
+      );
+
+      if (confirmation.value.err) {
+        throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
+      }
+
+      console.log('Transaction confirmed:', signature);
 
       // Check if this is a full port (amount equals balance)
       const isFullPort = numAmount === selectedToken.balance;
@@ -81,7 +103,23 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
       onClose();
     } catch (err: any) {
       console.error('Throw failed:', err);
-      setError(err.message || 'Transaction failed');
+
+      // Provide user-friendly error messages
+      let errorMessage = 'Transaction failed';
+
+      if (err.message?.includes('User rejected')) {
+        errorMessage = 'You cancelled the transaction';
+      } else if (err.message?.includes('insufficient funds') || err.message?.includes('Insufficient')) {
+        errorMessage = 'Insufficient SOL for transaction fee';
+      } else if (err.message?.includes('blockhash not found')) {
+        errorMessage = 'Transaction expired. Please try again';
+      } else if (err.message?.includes('Simulation failed')) {
+        errorMessage = 'Transaction simulation failed. Check your balance';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setSending(false);
     }

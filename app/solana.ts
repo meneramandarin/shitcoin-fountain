@@ -1,4 +1,4 @@
-import { Connection, PublicKey, Transaction } from '@solana/web3.js';
+import { Connection, PublicKey, Transaction, ComputeBudgetProgram } from '@solana/web3.js';
 import { createTransferInstruction, getAssociatedTokenAddress, createAssociatedTokenAccountInstruction, getAccount } from '@solana/spl-token';
 
 // ============================================
@@ -89,6 +89,16 @@ export async function fetchWalletTokens(walletAddress: string): Promise<TokenInf
 
 /**
  * Build a transaction to throw a token into the fountain
+ *
+ * SECURITY NOTE: This transaction may require creating an Associated Token Account (ATA)
+ * for the fountain if it doesn't already have one for the token being sent.
+ * This is SAFE and costs ~0.002 SOL. Wallet security warnings are normal for this operation.
+ *
+ * The transaction includes:
+ * 1. Priority fees to avoid transaction drops during network congestion
+ * 2. Compute budget limits to optimize costs
+ * 3. Optional ATA creation if needed (fountain doesn't have token account yet)
+ * 4. Token transfer from sender to fountain
  */
 export async function buildThrowTransaction(
   connection: Connection,
@@ -98,19 +108,32 @@ export async function buildThrowTransaction(
   decimals: number
 ): Promise<Transaction> {
   const transaction = new Transaction();
-  
+
+  // Add priority fee to avoid transaction drops during congestion
+  // Set compute unit price to 100,000 micro-lamports (0.0001 SOL per compute unit)
+  const priorityFeeIx = ComputeBudgetProgram.setComputeUnitPrice({
+    microLamports: 100000,
+  });
+  transaction.add(priorityFeeIx);
+
+  // Set compute unit limit to avoid over-paying
+  const computeLimitIx = ComputeBudgetProgram.setComputeUnitLimit({
+    units: 200000, // Enough for token transfer + potential ATA creation
+  });
+  transaction.add(computeLimitIx);
+
   // Get sender's token account
   const senderTokenAccount = await getAssociatedTokenAddress(
     tokenMint,
     senderWallet
   );
-  
+
   // Get or create fountain's token account
   const fountainTokenAccount = await getAssociatedTokenAddress(
     tokenMint,
     FOUNTAIN_ADDRESS
   );
-  
+
   // Check if fountain token account exists
   let fountainAccountExists = false;
   try {
@@ -119,7 +142,7 @@ export async function buildThrowTransaction(
   } catch {
     fountainAccountExists = false;
   }
-  
+
   // If fountain doesn't have a token account for this mint, create it
   // The sender pays for this (it's like ~0.002 SOL)
   if (!fountainAccountExists) {
@@ -132,10 +155,10 @@ export async function buildThrowTransaction(
       )
     );
   }
-  
+
   // Add transfer instruction
   const rawAmount = BigInt(Math.floor(amount * Math.pow(10, decimals)));
-  
+
   transaction.add(
     createTransferInstruction(
       senderTokenAccount,
@@ -144,11 +167,12 @@ export async function buildThrowTransaction(
       rawAmount
     )
   );
-  
-  // Get recent blockhash
-  const { blockhash } = await connection.getLatestBlockhash();
+
+  // Get recent blockhash with commitment level
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('finalized');
   transaction.recentBlockhash = blockhash;
   transaction.feePayer = senderWallet;
-  
+  transaction.lastValidBlockHeight = lastValidBlockHeight;
+
   return transaction;
 }
