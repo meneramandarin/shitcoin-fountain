@@ -356,9 +356,16 @@ export default function Home() {
       templateImg.crossOrigin = 'anonymous';
 
       await new Promise((resolve, reject) => {
-        templateImg.onload = resolve;
-        templateImg.onerror = reject;
-        templateImg.src = '/Share button.png';
+        templateImg.onload = () => {
+          console.log('Template image loaded successfully');
+          resolve(null);
+        };
+        templateImg.onerror = (err) => {
+          console.error('Template image failed to load:', err);
+          reject(new Error('Failed to load template image. Please check if /ShareButton.png exists in public folder.'));
+        };
+        console.log('Attempting to load template image from: /ShareButton.png');
+        templateImg.src = '/ShareButton.png';
       });
 
       // Create canvas matching template size
