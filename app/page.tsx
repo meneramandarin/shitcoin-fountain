@@ -253,7 +253,15 @@ export default function Home() {
       console.log('Starting template-based share image generation...');
 
       // First, capture the stats box from the UI
-      const html2canvas = (await import('html2canvas')).default;
+      let html2canvas;
+      try {
+        const module = await import('html2canvas');
+        html2canvas = module.default || module;
+      } catch (importErr) {
+        console.error('Failed to import html2canvas:', importErr);
+        throw new Error('Failed to load screenshot library');
+      }
+
       const statsBox = screenshotRef.current.querySelector('[data-stats-box]') as HTMLElement;
 
       if (!statsBox) {
@@ -444,7 +452,9 @@ export default function Home() {
       }, 'image/png');
     } catch (err) {
       console.error('Share image generation error:', err);
-      alert(`Failed to generate share image: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error('Error details:', { message: errorMessage, stack: err instanceof Error ? err.stack : undefined });
+      alert(`Failed to generate share image: ${errorMessage}`);
     }
   };
 
