@@ -5,6 +5,12 @@ import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { SolflareWalletAdapter } from '@solana/wallet-adapter-solflare';
+import {
+  SolanaMobileWalletAdapter,
+  createDefaultAddressSelector,
+  createDefaultAuthorizationResultCache,
+  createDefaultWalletNotFoundHandler,
+} from '@solana-mobile/wallet-adapter-mobile';
 import { clusterApiUrl } from '@solana/web3.js';
 import { useMemo } from 'react';
 
@@ -25,6 +31,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // This is harmless but we configure it explicitly to reduce console noise
   const wallets = useMemo(
     () => [
+      new SolanaMobileWalletAdapter({
+        addressSelector: createDefaultAddressSelector(),
+        appIdentity: {
+          name: 'Shitcoin Fountain',
+          uri: 'https://www.shitcoinfountain.fun',
+          icon: '/fountain.png',
+        },
+        authorizationResultCache: createDefaultAuthorizationResultCache(),
+        chain: WalletAdapterNetwork.Mainnet,
+        onWalletNotFound: createDefaultWalletNotFoundHandler(),
+      }),
       new PhantomWalletAdapter(),
       new SolflareWalletAdapter({ network }),
     ],
