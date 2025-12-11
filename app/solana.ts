@@ -1,5 +1,13 @@
 import { Connection, PublicKey, Transaction, ComputeBudgetProgram } from '@solana/web3.js';
-import { createTransferInstruction, getAssociatedTokenAddress, createAssociatedTokenAccountInstruction, getAccount } from '@solana/spl-token';
+import {
+  createTransferInstruction,
+  getAssociatedTokenAddress,
+  createAssociatedTokenAccountInstruction,
+  getAccount,
+  TOKEN_PROGRAM_ID,
+  TOKEN_2022_PROGRAM_ID,
+  getMint,
+} from '@solana/spl-token';
 
 // ============================================
 // FOUNTAIN WALLET - All thrown shitcoins go here!
@@ -122,22 +130,37 @@ export async function buildThrowTransaction(
   });
   transaction.add(computeLimitIx);
 
+  // Detect if this is a Token-2022 token or classic SPL token
+  // Try Token-2022 first, fall back to classic SPL
+  let tokenProgramId = TOKEN_PROGRAM_ID;
+  try {
+    const mintInfo = await getMint(connection, tokenMint, 'confirmed', TOKEN_2022_PROGRAM_ID);
+    tokenProgramId = TOKEN_2022_PROGRAM_ID;
+  } catch {
+    // Not Token-2022, use classic SPL
+    tokenProgramId = TOKEN_PROGRAM_ID;
+  }
+
   // Get sender's token account
   const senderTokenAccount = await getAssociatedTokenAddress(
     tokenMint,
-    senderWallet
+    senderWallet,
+    false,
+    tokenProgramId
   );
 
   // Get or create fountain's token account
   const fountainTokenAccount = await getAssociatedTokenAddress(
     tokenMint,
-    FOUNTAIN_ADDRESS
+    FOUNTAIN_ADDRESS,
+    false,
+    tokenProgramId
   );
 
   // Check if fountain token account exists
   let fountainAccountExists = false;
   try {
-    await getAccount(connection, fountainTokenAccount);
+    await getAccount(connection, fountainTokenAccount, 'confirmed', tokenProgramId);
     fountainAccountExists = true;
   } catch {
     fountainAccountExists = false;
@@ -151,7 +174,8 @@ export async function buildThrowTransaction(
         senderWallet,        // payer
         fountainTokenAccount, // new account
         FOUNTAIN_ADDRESS,     // owner
-        tokenMint            // mint
+        tokenMint,            // mint
+        tokenProgramId       // token program (SPL or Token-2022)
       )
     );
   }
@@ -164,7 +188,9 @@ export async function buildThrowTransaction(
       senderTokenAccount,
       fountainTokenAccount,
       senderWallet,
-      rawAmount
+      rawAmount,
+      [],                  // no multisig signers
+      tokenProgramId       // use the correct token program
     )
   );
 
