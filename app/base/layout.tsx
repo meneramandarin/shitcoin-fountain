@@ -16,6 +16,12 @@ export async function generateMetadata(): Promise<Metadata> {
       'fc:frame:button:1': 'Throw Shitcoins',
       'fc:frame:button:1:action': 'link',
       'fc:frame:button:1:target': 'https://shitcoinfountain.fun/base',
+      'base:primaryCategory': 'art-creativity',
+      'base:tags': 'crypto,art,shitcoins,shitcoin,tokens',
+      'base:subtitle': 'Throw tokens, get fortunes',
+      'base:tagline': 'Satirical crypto wishing well',
+      'base:description': 'A satirical crypto art project where you throw your worthless tokens into a magical fountain and receive cryptic fortunes about your web3 journey.',
+      'base:screenshotUrls': 'https://www.shitcoinfountain.fun/preview.png',
     },
   };
 }
