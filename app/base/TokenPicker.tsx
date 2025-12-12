@@ -9,6 +9,56 @@ import { TokenInfo, fetchWalletTokens, FOUNTAIN_ADDRESS, ERC20_ABI } from './evm
 const buenard = Buenard({ subsets: ['latin'], weight: ['400', '700'] });
 const ibmPlexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'] });
 
+// Type for anything with image fallbacks
+interface TokenWithImage {
+  image: string;
+  imageFallbacks: string[];
+  symbol: string;
+}
+
+// Smart image component that tries multiple URLs with fallbacks
+export function TokenImage({ token, className }: { token: TokenWithImage; className?: string }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [failed, setFailed] = useState(false);
+
+  // Reset when token changes
+  useEffect(() => {
+    setCurrentIndex(0);
+    setFailed(false);
+  }, [token.symbol]);
+
+  const handleError = () => {
+    // Try next fallback URL
+    if (currentIndex < token.imageFallbacks.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      // All URLs failed, show placeholder
+      setFailed(true);
+    }
+  };
+
+  const currentUrl = token.imageFallbacks[currentIndex];
+
+  if (!currentUrl || failed) {
+    return (
+      <img
+        src="/flowers.png"
+        alt={token.symbol}
+        className={className}
+      />
+    );
+  }
+
+  return (
+    <img
+      src={currentUrl}
+      alt={token.symbol}
+      className={className}
+      onError={handleError}
+    />
+  );
+}
+
 interface TokenPickerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -186,20 +236,7 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
                       onClick={() => setSelectedToken(token)}
                       className="w-full flex items-center gap-3 p-2 hover:bg-blue-100/50 transition text-left border-b border-blue-900/10"
                     >
-                      {token.image ? (
-                        <img
-                          src={token.image}
-                          alt={token.symbol}
-                          className="w-10 h-10 rounded-full bg-gray-200"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-xs">
-                          ?
-                        </div>
-                      )}
+                      <TokenImage token={token} className="w-10 h-10 rounded-full bg-gray-200" />
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-gray-800 truncate">
                           {token.symbol}
@@ -246,17 +283,7 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
                   </button>
 
                   <div className="flex items-center gap-3 p-3">
-                    {selectedToken.image ? (
-                      <img
-                        src={selectedToken.image}
-                        alt={selectedToken.symbol}
-                        className="w-10 h-10 rounded-full"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center">
-                        ?
-                      </div>
-                    )}
+                    <TokenImage token={selectedToken} className="w-10 h-10 rounded-full" />
                     <div>
                       <div className="font-medium text-black">{selectedToken.symbol}</div>
                       <div className="text-sm text-gray-700">

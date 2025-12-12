@@ -4,7 +4,7 @@ import { useAccount, useDisconnect, useConnect } from 'wagmi';
 import { useConnectors } from 'wagmi';
 import { Carattere, IBM_Plex_Mono } from 'next/font/google';
 import { useRef, useState, useEffect } from 'react';
-import { TokenPicker } from './TokenPicker';
+import { TokenPicker, TokenImage } from './TokenPicker';
 import { CelebrationScreen } from '@/app/CelebrationScreen';
 import { TokenInfo, fetchWalletTokens, FOUNTAIN_ADDRESS } from './evm';
 import { BaseProviders } from './providers';
@@ -99,6 +99,7 @@ interface TokenStats {
   symbol: string;
   name: string;
   image: string;
+  imageFallbacks: string[];
   amount: number;
 }
 
@@ -112,16 +113,21 @@ const updateUserStats = (token: TokenInfo, amount: number) => {
         symbol: token.symbol,
         name: token.name,
         image: token.image,
+        imageFallbacks: token.imageFallbacks,
         amount: existing + amount,
       };
     } else {
       existing.amount += amount;
+      // Update image URLs in case they changed
+      existing.image = token.image;
+      existing.imageFallbacks = token.imageFallbacks;
     }
   } else {
     stats[token.symbol] = {
       symbol: token.symbol,
       name: token.name,
       image: token.image,
+      imageFallbacks: token.imageFallbacks,
       amount: amount,
     };
   }
@@ -132,6 +138,11 @@ const getUserTopTokens = (): TokenStats[] => {
   const stats = JSON.parse(localStorage.getItem('userStatsBase') || '{}');
   return Object.values(stats)
     .filter((token: any) => typeof token === 'object' && token.amount !== undefined)
+    .map((token: any) => ({
+      ...token,
+      // Ensure imageFallbacks exists for older localStorage entries
+      imageFallbacks: token.imageFallbacks || [token.image].filter(Boolean),
+    }))
     .sort((a: any, b: any) => b.amount - a.amount)
     .slice(0, 3) as TokenStats[];
 };
@@ -562,20 +573,7 @@ function BasePage() {
                     {getUserTopTokens().map((token, index) => (
                       <div key={token.symbol} className="flex items-center gap-2 text-sm">
                         <span className="text-gray-600">#{index + 1}</span>
-                        {token.image ? (
-                          <img
-                            src={token.image}
-                            alt={token.symbol}
-                            className="w-5 h-5 rounded-full bg-gray-200"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <div className="w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-xs">
-                            ?
-                          </div>
-                        )}
+                        <TokenImage token={token} className="w-5 h-5 rounded-full bg-gray-200" />
                         <span className="text-gray-700 flex-1">{token.symbol}</span>
                         <span className={`${ibmPlexMono.className} text-xs text-gray-700`}>
                           {formatNumber(token.amount)}
@@ -600,20 +598,7 @@ function BasePage() {
                     {fountainTokens.slice(0, 3).map((token, index) => (
                       <div key={token.address} className="flex items-center gap-2 text-sm">
                         <span className="text-gray-600">#{index + 1}</span>
-                        {token.image ? (
-                          <img
-                            src={token.image}
-                            alt={token.symbol}
-                            className="w-5 h-5 rounded-full bg-gray-200"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <div className="w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-xs">
-                            ?
-                          </div>
-                        )}
+                        <TokenImage token={token} className="w-5 h-5 rounded-full bg-gray-200" />
                         <span className="text-gray-700 flex-1">{token.symbol}</span>
                         <span className={`${ibmPlexMono.className} text-xs text-gray-700`}>
                           {formatNumber(token.balance)}

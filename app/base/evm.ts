@@ -11,6 +11,7 @@ export interface TokenInfo {
   symbol: string;
   name: string;
   image: string;
+  imageFallbacks: string[]; // Multiple logo URLs to try
   balance: number;
   decimals: number;
   usdValue?: number;
@@ -81,15 +82,27 @@ export async function fetchWalletTokens(walletAddress: Address): Promise<TokenIn
           const rawBalance = BigInt(token.tokenBalance);
           const balance = Number(formatUnits(rawBalance, decimals));
 
-          // Use ONLY Alchemy's logo field - it's the most reliable
-          const logoUrl = metadata.logo || '';
+          const checksumAddress = token.contractAddress; // Viem addresses are already checksummed
+          const lowerAddress = token.contractAddress.toLowerCase();
 
-          console.log(`Token ${metadata.symbol} (${token.contractAddress}): Alchemy logo = ${logoUrl || 'NONE'}`);
-          console.log('Full metadata:', metadata);
+          // Build multiple logo sources to try (in priority order)
+          const logoFallbacks = [
+            metadata.logo, // 1. Alchemy's logo (often empty on Base unfortunately)
+            // 2. TrustWallet asset repository (covers most major tokens)
+            `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/${checksumAddress}/logo.png`,
+            // 3. 1inch token list (good coverage for DeFi tokens)
+            `https://tokens.1inch.io/${lowerAddress}.png`,
+          ].filter(Boolean); // Remove any null/undefined values
 
-          // Truncate symbol and name to max 20 characters
-          const symbol = (metadata.symbol || '???').slice(0, 20);
-          const name = (metadata.name || 'Unknown Token').slice(0, 20);
+          const logoUrl = logoFallbacks[0] || ''; // Primary URL for display
+
+          console.log(`Token ${metadata.symbol} (${token.contractAddress}):`);
+          console.log(`  - Alchemy logo: ${metadata.logo || 'NONE'}`);
+          console.log(`  - Fallback URLs: ${logoFallbacks.length - 1} available`);
+
+          // Truncate symbol to 15 characters and name to 20 characters
+          const symbol = (metadata.symbol || '???').slice(0, 15);
+          const name = (metadata.name || 'Unknown Token').slice(0, 15);
 
           // Fetch USD price from our server-side API (proxies CoinGecko to avoid CORS)
           let usdValue: number | undefined = undefined;
@@ -112,6 +125,7 @@ export async function fetchWalletTokens(walletAddress: Address): Promise<TokenIn
             symbol,
             name,
             image: logoUrl,
+            imageFallbacks: logoFallbacks,
             balance,
             decimals,
             usdValue,
