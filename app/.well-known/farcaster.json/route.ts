@@ -10,21 +10,20 @@ export async function GET() {
     frame: {
       version: '1',
       name: 'Shitcoin Fountain',
-      iconUrl: 'https://www.shitcoinfountain.fun/fountain.png',
+      iconUrl: 'https://www.shitcoinfountain.fun/iconURL.png',
       homeUrl: 'https://www.shitcoinfountain.fun/base',
       imageUrl: 'https://www.shitcoinfountain.fun/preview.png',
       buttonTitle: 'Throw Shitcoins',
-      splashImageUrl: 'https://www.shitcoinfountain.fun/fountain.gif',
+      splashImageUrl: 'https://www.shitcoinfountain.fun/splashImageUrl.png',
       splashBackgroundColor: '#ffffff',
       webhookUrl: 'https://www.shitcoinfountain.fun/base',
       primaryCategory: 'art-creativity',
       tags: ['crypto', 'art', 'shitcoins', 'shitcoin', 'tokens'],
-      subtitle: 'Throw tokens, get fortunes',
-      tagline: 'Satirical crypto wishing well',
-      description: 'A satirical crypto art project where you throw your worthless tokens into a magical fountain and receive cryptic fortunes about your web3 journey.',
-      screenshotUrls: [
-        'https://www.shitcoinfountain.fun/preview.png',
-      ],
+      subtitle: 'Throw a shitcoin, make a wish.',
+      tagline: 'Take your shitcoins for one last ride!',
+      description: 'Throw your worthless shitcoins into the magical fountain and peak into the future of your web3 journey.',
+      screenshotUrls: ['https://www.shitcoinfountain.fun/scereenshotUrl.png'],
+      heroImageUrl: 'https://www.shitcoinfountain.fun/preview.png',
     },
   };
 
