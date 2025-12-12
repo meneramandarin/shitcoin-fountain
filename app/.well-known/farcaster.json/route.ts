@@ -17,15 +17,15 @@ export async function GET() {
       splashImageUrl: 'https://www.shitcoinfountain.fun/fountain.gif',
       splashBackgroundColor: '#ffffff',
       webhookUrl: 'https://www.shitcoinfountain.fun/base',
+      primaryCategory: 'art-creativity',
+      tags: ['crypto', 'art', 'shitcoins', 'shitcoin', 'tokens'],
+      subtitle: 'Throw tokens, get fortunes',
+      tagline: 'Satirical crypto wishing well',
+      description: 'A satirical crypto art project where you throw your worthless tokens into a magical fountain and receive cryptic fortunes about your web3 journey.',
+      screenshotUrls: [
+        'https://www.shitcoinfountain.fun/preview.png',
+      ],
     },
-    primaryCategory: 'art-creativity',
-    tags: ['crypto', 'art', 'shitcoins', 'shitcoin', 'tokens'],
-    subtitle: 'Throw tokens, get fortunes',
-    tagline: 'Satirical crypto wishing well',
-    description: 'A satirical crypto art project where you throw your worthless tokens into a magical fountain and receive cryptic fortunes about your web3 journey.',
-    screenshotUrls: [
-      'https://www.shitcoinfountain.fun/preview.png',
-    ],
   };
 
   return NextResponse.json(manifest);
