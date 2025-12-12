@@ -39,6 +39,9 @@ export const metadata: Metadata = {
     description: "Yeet your garbage tokens into the magical wishing well.",
     images: [`${baseUrl}/preview.png`],
   },
+  other: {
+    'base:app_id': '693b645fe6be54f5ed71d6dd',
+  },
 };
 
 export default function RootLayout({
