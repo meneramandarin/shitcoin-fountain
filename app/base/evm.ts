@@ -92,7 +92,7 @@ export async function fetchWalletTokens(walletAddress: Address): Promise<TokenIn
             `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/${checksumAddress}/logo.png`,
             // 3. 1inch token list (good coverage for DeFi tokens)
             `https://tokens.1inch.io/${lowerAddress}.png`,
-          ].filter(Boolean); // Remove any null/undefined values
+          ].filter(url => url && url.trim().length > 0); // Remove null/undefined/empty strings
 
           const logoUrl = logoFallbacks[0] || ''; // Primary URL for display
 

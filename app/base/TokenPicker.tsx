@@ -28,18 +28,22 @@ export function TokenImage({ token, className }: { token: TokenWithImage; classN
   }, [token.symbol]);
 
   const handleError = () => {
+    console.log(`[TokenImage] ${token.symbol} failed to load URL #${currentIndex}: ${token.imageFallbacks[currentIndex]}`);
+
     // Try next fallback URL
     if (currentIndex < token.imageFallbacks.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
       // All URLs failed, show placeholder
+      console.log(`[TokenImage] ${token.symbol} - all ${token.imageFallbacks.length} URLs failed, showing flowers.png`);
       setFailed(true);
     }
   };
 
   const currentUrl = token.imageFallbacks[currentIndex];
 
-  if (!currentUrl || failed) {
+  // If no valid URL or all failed, show flowers placeholder
+  if (!currentUrl || currentUrl.trim().length === 0 || failed) {
     return (
       <img
         src="/flowers.png"
@@ -55,6 +59,7 @@ export function TokenImage({ token, className }: { token: TokenWithImage; classN
       alt={token.symbol}
       className={className}
       onError={handleError}
+      loading="lazy"
     />
   );
 }
