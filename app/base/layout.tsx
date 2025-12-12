@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     images: ['/fountain.png'],
   },
   other: {
+    'base:app_id': '693b645fe6be54f5ed71d6dd',
     'fc:frame': 'vNext',
     'fc:frame:image': 'https://shitcoinfountain.fun/fountain.png',
     'fc:frame:button:1': 'Throw Shitcoins',
