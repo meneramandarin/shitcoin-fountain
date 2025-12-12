@@ -18,6 +18,16 @@ export async function GET() {
       splashBackgroundColor: '#ffffff',
       webhookUrl: 'https://www.shitcoinfountain.fun/base',
     },
+    metadata: {
+      primaryCategory: 'art-creativity',
+      tags: ['crypto', 'art', 'satire', 'fountain', 'tokens'],
+      subtitle: 'Throw tokens, get fortunes',
+      tagline: 'Satirical crypto wishing well',
+      description: 'A satirical crypto art project where you throw your worthless tokens into a magical fountain and receive cryptic fortunes about your web3 journey.',
+      screenshotUrls: [
+        'https://www.shitcoinfountain.fun/preview.png',
+      ],
+    },
   };
 
   return NextResponse.json(manifest);
