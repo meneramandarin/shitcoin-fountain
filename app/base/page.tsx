@@ -162,6 +162,12 @@ function BasePage() {
   const { disconnect } = useDisconnect();
   const { connect } = useConnect();
   const connectors = useConnectors();
+  const [mounted, setMounted] = useState(false);
+
+  // Handle client-side mounting to prevent hydration errors
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Signal ready to Farcaster mini app SDK
   useEffect(() => {
@@ -481,7 +487,7 @@ function BasePage() {
           className="text-lg text-black underline decoration-1 decoration-black hover:opacity-70 transition font-normal"
           aria-label={isConnected ? 'Disconnect wallet' : 'Connect wallet'}
         >
-          {isConnected && address ? truncateAddress(address) : 'Connect wallet'}
+          {mounted && isConnected && address ? truncateAddress(address) : 'Connect wallet'}
         </button>
       </div>
 

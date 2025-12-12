@@ -20,7 +20,7 @@ export async function GET() {
       primaryCategory: 'art-creativity',
       tags: ['crypto', 'art', 'shitcoins', 'shitcoin', 'tokens'],
       subtitle: 'Throw a shitcoin, make a wish.',
-      tagline: 'Take your shitcoins for one last ride!',
+      tagline: 'Take shitcoins for a last ride',
       description: 'Throw your worthless shitcoins into the magical fountain and peak into the future of your web3 journey.',
       screenshotUrls: ['https://www.shitcoinfountain.fun/scereenshotUrl.png'],
       heroImageUrl: 'https://www.shitcoinfountain.fun/preview.png',

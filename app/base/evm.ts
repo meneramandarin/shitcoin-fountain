@@ -81,16 +81,40 @@ export async function fetchWalletTokens(walletAddress: Address): Promise<TokenIn
           const rawBalance = BigInt(token.tokenBalance);
           const balance = Number(formatUnits(rawBalance, decimals));
 
+          // Use ONLY Alchemy's logo field - it's the most reliable
+          const logoUrl = metadata.logo || '';
+
+          console.log(`Token ${metadata.symbol} (${token.contractAddress}): Alchemy logo = ${logoUrl || 'NONE'}`);
+          console.log('Full metadata:', metadata);
+
+          // Truncate symbol and name to max 20 characters
+          const symbol = (metadata.symbol || '???').slice(0, 20);
+          const name = (metadata.name || 'Unknown Token').slice(0, 20);
+
+          // Fetch USD price from our server-side API (proxies CoinGecko to avoid CORS)
+          let usdValue: number | undefined = undefined;
+          try {
+            const priceResponse = await fetch(
+              `/api/token-price?address=${token.contractAddress.toLowerCase()}`
+            );
+            const priceData = await priceResponse.json();
+            const price = priceData.price;
+            if (price !== null && price !== undefined && balance > 0) {
+              usdValue = price * balance;
+            }
+          } catch (priceErr) {
+            // Price fetch failed - that's okay, we'll show "literally worthless"
+            console.log(`No price data for ${symbol}`);
+          }
+
           return {
             address: token.contractAddress as Address,
-            symbol: metadata.symbol || '???',
-            name: metadata.name || 'Unknown Token',
-            image: metadata.logo || '',
+            symbol,
+            name,
+            image: logoUrl,
             balance,
             decimals,
-            // Note: Alchemy doesn't provide price data in token metadata
-            // You'd need to integrate with a price API separately if needed
-            usdValue: undefined,
+            usdValue,
           };
         } catch (err) {
           console.error('Failed to fetch token metadata:', err);

@@ -215,9 +215,14 @@ export function TokenPicker({ isOpen, onClose, onSuccess }: TokenPickerProps) {
                             minimumFractionDigits: 2,
                           })}
                         </div>
-                        {token.usdValue !== undefined ? (
+                        {token.usdValue !== undefined && token.usdValue > 0 ? (
                           <div className={`text-xs text-gray-500 ${ibmPlexMono.className}`}>
-                            ${token.usdValue.toFixed(2)}
+                            {token.usdValue >= 0.01
+                              ? `$${token.usdValue.toFixed(2)}`
+                              : token.usdValue >= 0.001
+                              ? `$${token.usdValue.toFixed(3)}`
+                              : `$${token.usdValue.toFixed(4)}`
+                            }
                           </div>
                         ) : (
                           <div className="text-xs text-gray-500 italic">
