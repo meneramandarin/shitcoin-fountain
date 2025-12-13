@@ -461,7 +461,7 @@ function BasePage() {
           console.log('Image copied to clipboard!');
 
           const tweetText = encodeURIComponent(
-            'I threw my shitcoins into a fountain >�=�\n\nshitcoinfountain.fun/base'
+            'I threw my shitcoins into a fountain ✨🪙\n\nshitcoinfountain.fun/base'
           );
           window.open(`https://twitter.com/intent/tweet?text=${tweetText}`, '_blank');
         } catch (clipboardErr) {

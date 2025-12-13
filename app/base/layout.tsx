@@ -7,12 +7,18 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: 'Shitcoin Fountain',
       description: 'Throw a shitcoin. Make a wish.',
-      images: ['/fountain.png'],
+      images: ['/preview.png'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Shitcoin Fountain',
+      description: 'Throw a shitcoin. Make a wish.',
+      images: ['/preview.png'],
     },
     other: {
       'base:app_id': '693b645fe6be54f5ed71d6dd',
       'fc:frame': 'vNext',
-      'fc:frame:image': 'https://shitcoinfountain.fun/fountain.png',
+      'fc:frame:image': 'https://shitcoinfountain.fun/preview.png',
       'fc:frame:button:1': 'Throw Shitcoins',
       'fc:frame:button:1:action': 'link',
       'fc:frame:button:1:target': 'https://shitcoinfountain.fun/base',
