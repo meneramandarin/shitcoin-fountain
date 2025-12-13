@@ -137,9 +137,20 @@ export async function fetchWalletTokens(walletAddress: Address): Promise<TokenIn
       })
     );
 
-    // Filter out failed fetches and sort by balance descending
+    // Filter out failed fetches, dust tokens, and sort by balance descending
     return tokens
       .filter((token): token is TokenInfo => token !== null)
+      .filter((token) => {
+        // Filter out tokens with balance < 1 unless they have significant USD value
+        if (token.balance < 1) {
+          // Only keep if USD value is above $0.01
+          if (token.usdValue === undefined || token.usdValue < 0.01) {
+            console.log(`Filtering out dust: ${token.symbol} (balance: ${token.balance}, value: ${token.usdValue ? `$${token.usdValue}` : 'no price data'})`);
+            return false;
+          }
+        }
+        return true;
+      })
       .sort((a, b) => {
         // Sort by USD value if available, otherwise by balance
         if (a.usdValue !== undefined && b.usdValue !== undefined) {
